@@ -1,0 +1,52 @@
+<template>
+    <div class="root">
+        <img :src="avatar" class="avatar">
+        <span class="name">{{ name }}</span>
+        <span class="des">{{ des }}</span>
+    </div>
+</template>
+<script>
+export default {
+    props: {
+        avatar: {
+            type: String,
+            default: ""
+        },
+        name: {
+            type: String,
+            default: "UnknownMember"
+        },
+        des: {
+            type: String,
+            default: "Description"
+        }
+    }
+}
+</script>
+<style scoped>
+.avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.name {
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    margin-top: 5px;
+}
+
+.des {
+    color: white;
+    margin-top: 5px;
+}
+
+.root {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 30px;
+}
+</style>
