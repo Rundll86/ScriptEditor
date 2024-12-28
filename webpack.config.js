@@ -3,6 +3,7 @@ const WebpackBar = require("webpackbar");
 const FriendlyErrorsWebpackPlugin = require("friendly-errors-webpack-plugin");
 const { VueLoaderPlugin } = require("vue-loader");
 const path = require("path");
+const CopyPlugin = require("copy-webpack-plugin");
 /**
  * @type {import('webpack').Configuration}
  */
@@ -28,6 +29,11 @@ module.exports = {
             {
                 test: /\.ts$/i,
                 use: "ts-loader",
+                exclude: /\.d\.ts$/i
+            },
+            {
+                test: /\.d\.ts$/i,
+                use: "null-loader"
             }
         ]
     },
@@ -43,15 +49,26 @@ module.exports = {
         new FriendlyErrorsWebpackPlugin({
             clearConsole: true
         }),
-        new VueLoaderPlugin()
+        new VueLoaderPlugin(),
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: "./public",
+                    to: "."
+                }
+            ]
+        })
     ],
     devServer: {
-        static: ".",
+        static: "public",
         compress: true,
         port: 19198,
         client: {
             logging: "none"
         }
     },
-    stats: "none"
+    stats: "none",
+    performance: {
+        maxAssetSize: Infinity
+    }
 };

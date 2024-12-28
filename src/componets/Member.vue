@@ -1,6 +1,6 @@
 <template>
     <div class="root">
-        <img :src="`/public/img/${name}.jpg`" class="avatar">
+        <img :src="`./img/${name}.jpg`" class="avatar">
         <span class="name">{{ name }}</span>
         <span class="des">{{ des }}</span>
     </div>

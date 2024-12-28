@@ -1,5 +1,5 @@
 <template>
-    <img :src="`/public/img/icons/${src}`" :alt="src" :style="{ '--w': `${width}px` }">
+    <img :src="`./img/icons/${src}`" :alt="src" :style="{ '--w': `${width}px` }">
 </template>
 <script>
 export default {

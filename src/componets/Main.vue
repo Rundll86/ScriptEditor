@@ -34,6 +34,14 @@
             testtesttest<br>
             placeholder
         </SubWindow>
+        <SubWindow title="Project" :states="windowState" name="project">
+            <div class="projs">
+                <WideButton @click="generatedCode">Generate</WideButton>
+                <WideButton>Export</WideButton>
+                <WideButton>Test in TurboWarp</WideButton>
+                <WideButton>Test in GandiIDE</WideButton>
+            </div>
+        </SubWindow>
     </div>
 </template>
 <style scoped>
@@ -78,6 +86,15 @@
 .config-bar>* {
     margin-left: 5px;
 }
+
+.projs {
+    display: flex;
+    flex-direction: column;
+}
+
+.projs>.btn {
+    margin: 5px;
+}
 </style>
 <script setup>
 import LeftBox from './LeftBox.vue';
@@ -87,6 +104,7 @@ import ArgumentPart from './ArgumentPart.vue';
 import CheckBox from './CheckBox.vue';
 import WideButton from './WideButton.vue';
 import { toRaw } from 'vue';
+import md5 from 'md5';
 </script>
 <script>
 export default {
@@ -94,9 +112,10 @@ export default {
         return {
             blocks: [],
             windowState: {
-                block: true,
+                block: false,
                 menus: false,
-                loaders: false
+                loaders: false,
+                project: false
             },
             parts: [
                 {
@@ -148,7 +167,7 @@ export default {
                 this.blockOpcode = "";
             } else {
                 this.disabledOpcode = true;
-                this.blockOpcode = btoa(this.calcBlockText(this.parts));
+                this.blockOpcode = "_" + md5(this.calcBlockTextWithoutArgInfo(this.parts));
             };
         },
         saveBlock() {
@@ -173,12 +192,22 @@ export default {
                 };
             }).join("");
         },
+        calcBlockTextWithoutArgInfo(parts) {
+            return parts.map(part => {
+                if (part.isText) {
+                    return part.content;
+                } else {
+                    return `[${part.content}]`;
+                };
+            }).join("");
+        },
         toRawBlockData(proxiedBlock) {
             return {
                 opcode: toRaw(proxiedBlock.opcode),
                 parts: toRaw(proxiedBlock.parts),
                 useDecorator: toRaw(proxiedBlock.useDecorator),
-                text: proxiedBlock.text
+                text: proxiedBlock.text,
+                plainText: proxiedBlock.plainText
             };
         },
         currentBlock() {
@@ -186,7 +215,8 @@ export default {
                 opcode: this.blockOpcode,
                 parts: this.parts,
                 useDecorator: this.useDecorator,
-                text: this.calcBlockText(this.parts)
+                text: this.calcBlockText(this.parts),
+                plainText: this.calcBlockTextWithoutArgInfo(this.parts)
             });
         },
         findBlock(opcode) {
@@ -194,6 +224,27 @@ export default {
         },
         removePart(index) {
             this.parts = this.parts.filter((_, i) => String(i) !== String(index));
+        },
+        buildServerHost() {
+            let url = window.location;
+            return url.protocol + "//" + url.hostname + ":" + 1145 + "/api"
+        },
+        async generatedCode() {
+            const response = await fetch(
+                this.buildServerHost(),
+                {
+                    method: "post",
+                    body: JSON.stringify({
+                        blocks: this.blocks
+                    }),
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                }
+            );
+            const generated = await response.text();
+            navigator.clipboard.writeText(generated);
+            alert("已复制")
         }
     }
 }

@@ -1,2 +1,10 @@
+# module store
 node_modules
+
+# lockfile
 yarn.lock
+package-lock.json
+
+# compiler output
+dist
+generated

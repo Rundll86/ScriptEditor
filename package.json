@@ -1,16 +1,22 @@
 {
   "name": "ext-maker-gui",
   "scripts": {
-    "dev": "webpack serve --mode development"
+    "dev": "webpack serve --mode development",
+    "dist": "webpack --mode production"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
+    "@types/md5": "^2.3.5",
+    "copy-webpack-plugin": "^12.0.2",
+    "cors": "^2.8.5",
     "css-loader": "^7.1.2",
     "eslint": "^9.17.0",
     "eslint-plugin-vue": "^9.32.0",
     "friendly-errors-webpack-plugin": "^1.7.0",
     "globals": "^15.14.0",
     "html-webpack-plugin": "^5.6.3",
+    "md5": "^2.3.0",
+    "null-loader": "^4.0.1",
     "raw-loader": "^4.0.2",
     "ts-loader": "^9.5.1",
     "typescript": "^5.7.2",

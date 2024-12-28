@@ -29,6 +29,10 @@
                 <!-- <Icon src="block.png" /> -->
                 Adv
             </ToolBtn>
+            <ToolBtn @click="openWindow('project')">
+                <!-- <Icon src="block.png" /> -->
+                Proj
+            </ToolBtn>
         </div>
     </div>
 </template>

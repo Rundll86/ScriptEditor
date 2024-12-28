@@ -14,7 +14,7 @@
             <input v-model="part.content">
             <div class="arg-only" v-if="!part.isText">
                 Input type:
-                <Selector v-model="part.data.inputType" :options="['String', 'Number', 'Boolean']" />
+                <Selector v-model="part.data.inputType" :options="['String', 'Number', 'Bool']" />
                 Default value:
                 <input v-model="part.data.defaultValue">
                 Use loader:
