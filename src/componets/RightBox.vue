@@ -1,7 +1,6 @@
 <template>
     <div class="right-box">
-        <!-- <ScratchBlock>test [abc:number=1] apple</ScratchBlock> -->
-        <div v-for="block in blocks" :key="block.opcode">
+        <div v-for="block in blocks" :key="block.opcode" :ref="block.opcode">
             <ScratchBlock>{{ block.text }}</ScratchBlock>
         </div>
     </div>
@@ -21,6 +20,11 @@
 export default {
     props: {
         blocks: Array
+    },
+    watch: {
+        blocks() {
+            console.log(this.$refs);
+        }
     }
 }
 </script>

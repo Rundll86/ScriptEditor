@@ -1,43 +1,44 @@
 <template>
     <div class="container">
         <div class="title-bar" @click="toggle">
-            <span class="type">{{ isText ? "Text" : "Arg" }}</span>
+            <span class="type">{{ part.isText ? "Text" : "Arg" }}</span>
             <span class="state">{{ opening ? "▼" : "▶" }}</span>
             <span :class="{
                 content: true,
-                label: !isText
-            }">{{ contentValue }}</span>
+                label: !part.isText
+            }">{{ part.content }}</span>
         </div>
         <div class="attrs" v-if="opening">
+            <WideButton @click="$emit('remove', index)">Remove</WideButton>
             Content:
-            <input v-model="contentValue">
-            <div class="arg-only" v-if="!isText">
-                InputType:
-                <Selector :options="['String', 'Number', 'Boolean']" />
-                DefaultValue:
-                <InputBox />
-                UseLoader:
-                <Selector :options="['<Null>']" />
-                UseMenu:
-                <Selector :options="['<Null>']" />
+            <input v-model="part.content">
+            <div class="arg-only" v-if="!part.isText">
+                Input type:
+                <Selector v-model="part.data.inputType" :options="['String', 'Number', 'Boolean']" />
+                Default value:
+                <input v-model="part.data.defaultValue">
+                Use loader:
+                <Selector v-model="part.data.loader" :options="['<Null>', 'a', 'b']" />
+                Use menu:
+                <Selector v-model="part.data.menu" :options="['<Null>', 'c', 'd']" />
             </div>
         </div>
     </div>
 </template>
 <script setup>
 import Selector from './Selector.vue';
+import WideButton from './WideButton.vue';
 </script>
 <script>
 export default {
     props: {
-        isText: Boolean,
-        content: String,
-        open: Boolean
+        open: Boolean,
+        part: Object,
+        index: Number
     },
     data() {
         return {
-            opening: this.open ?? false,
-            contentValue: this.content
+            opening: this.open ?? false
         };
     },
     methods: {

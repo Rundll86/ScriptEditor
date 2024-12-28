@@ -17,6 +17,7 @@
     </div>
 </template>
 <script>
+import { watch } from 'vue';
 class ArgumentPart {
     content = "";
     type = "text";
@@ -101,8 +102,11 @@ const TextParser = {
 export default {
     name: 'ScratchBlock',
     mounted() {
-        this.parsed = TextParser.parsePart(this.$slots.default()[0].children);
-        this.$slots.default()[0].children = "";
+        this.reloadParts();
+        watch(
+            () => this.$slots.default()[0].children,
+            () => this.reloadParts()
+        );
     },
     data() {
         return {
@@ -134,6 +138,9 @@ export default {
             hexs = str.match(/../g) || [];
             if (hexs.length < 3) throw new Error('Invalid hex color string');
             return [parseInt(hexs[0], 16), parseInt(hexs[1], 16), parseInt(hexs[2], 16)];
+        },
+        reloadParts() {
+            this.parsed = TextParser.parsePart(this.$slots.default()[0].children);
         }
     }
 }

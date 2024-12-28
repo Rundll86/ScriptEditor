@@ -6,16 +6,28 @@
     <div class="high-layer">
         <SubWindow title="Block Settings" :states="windowState" name="block">
             <div class="args">
-                <ArgumentPart v-for="part in parts" :isText="part.isText" :content="part.content" />
+                <span class="tip" v-if="parts.length === 0">
+                    There're not any parts.
+                </span>
+                <ArgumentPart @remove="removePart" :index="index" :part="part" v-for="part, index in parts"
+                    :isText="part.isText" :content="part.content" />
             </div>
             <div class="config-bar">
-                UseDecorator
-                <CheckBox class="left-auto" />
+                Use decorator?
+                <CheckBox v-model="useDecorator" class="left-auto" />
             </div>
             <div class="config-bar">
-                Add Parts
+                Add parts
                 <WideButton class="left-auto" @click="addText">Text</WideButton>
                 <WideButton @click="addArg">Arg</WideButton>
+            </div>
+            <div class="config-bar">
+                Block opcode:
+                <input style="margin-left: 10px;" v-model="blockOpcode" :disabled="disabledOpcode">
+                <WideButton @click="autoOpcode">Auto</WideButton>
+            </div>
+            <div class="config-bar">
+                <WideButton class="left-auto" @click="saveBlock">Save</WideButton>
             </div>
         </SubWindow>
         <SubWindow title="Loaders" :states="windowState" name="loaders">
@@ -40,19 +52,31 @@
 }
 
 .left-auto {
-    margin-left: auto;
+    margin-left: auto !important;
 }
 
 .args {
     overflow-y: auto;
-    max-height: 50vh;
+    max-height: 70vh;
     border: 1px solid gray;
     margin-bottom: 10px;
+}
+
+.tip {
+    display: block;
+    text-align: center;
+    margin: 5px;
 }
 
 .config-bar {
     display: flex;
     align-items: center;
+    margin: 5px 0;
+    text-wrap: nowrap;
+}
+
+.config-bar>* {
+    margin-left: 5px;
 }
 </style>
 <script setup>
@@ -62,6 +86,7 @@ import SubWindow from './SubWindow.vue';
 import ArgumentPart from './ArgumentPart.vue';
 import CheckBox from './CheckBox.vue';
 import WideButton from './WideButton.vue';
+import { toRaw } from 'vue';
 </script>
 <script>
 export default {
@@ -80,13 +105,22 @@ export default {
                 },
                 {
                     content: 'something',
-                    isText: false
+                    isText: false,
+                    data: {
+                        inputType: "String",
+                        defaultValue: "",
+                        loader: null,
+                        menu: null
+                    }
                 },
                 {
                     content: 'to window',
                     isText: true
                 }
-            ]
+            ],
+            blockOpcode: "",
+            disabledOpcode: false,
+            useDecorator: false
         };
     },
     methods: {
@@ -99,8 +133,67 @@ export default {
         addArg() {
             this.parts.push({
                 content: "argName",
-                isText: false
+                isText: false,
+                data: {
+                    inputType: "String",
+                    defaultValue: "",
+                    loader: null,
+                    menu: null
+                }
             });
+        },
+        autoOpcode() {
+            if (this.disabledOpcode) {
+                this.disabledOpcode = false;
+                this.blockOpcode = "";
+            } else {
+                this.disabledOpcode = true;
+                this.blockOpcode = btoa(this.calcBlockText(this.parts));
+            };
+        },
+        saveBlock() {
+            const targetWrite = this.findBlock(this.blockOpcode);
+            const currentBlock = this.currentBlock();
+            if (targetWrite) {
+                targetWrite.parts = currentBlock.parts;
+                targetWrite.useDecorator = currentBlock.useDecorator;
+                targetWrite.text = currentBlock.text;
+            } else {
+                this.blocks.push(currentBlock);
+            };
+        },
+        calcBlockText(parts) {
+            return parts.map(part => {
+                if (part.isText) {
+                    return part.content;
+                } else {
+                    const inputType = part.data.inputType === "String" ? "" : `:${part.data.inputType.toLowerCase()}`;
+                    const defaultValue = part.data.defaultValue ? `=${part.data.defaultValue}` : "";
+                    return `[${part.content}${inputType}${defaultValue}]`;
+                };
+            }).join("");
+        },
+        toRawBlockData(proxiedBlock) {
+            return {
+                opcode: toRaw(proxiedBlock.opcode),
+                parts: toRaw(proxiedBlock.parts),
+                useDecorator: toRaw(proxiedBlock.useDecorator),
+                text: proxiedBlock.text
+            };
+        },
+        currentBlock() {
+            return this.toRawBlockData({
+                opcode: this.blockOpcode,
+                parts: this.parts,
+                useDecorator: this.useDecorator,
+                text: this.calcBlockText(this.parts)
+            });
+        },
+        findBlock(opcode) {
+            return this.blocks.find(block => block.opcode === opcode) || null;
+        },
+        removePart(index) {
+            this.parts = this.parts.filter((_, i) => String(i) !== String(index));
         }
     }
 }

@@ -1,7 +1,7 @@
 <template>
     <span :class="{
         checked: isChecked
-    }" @click="isChecked = !isChecked"></span>
+    }" @click="toggle"></span>
 </template>
 <style scoped>
 span {
@@ -36,14 +36,24 @@ span.checked::before {
 <script>
 export default {
     props: {
-        checked: {
+        modelValue: {
             type: Boolean,
             default: false
         }
     },
+    methods: {
+        toggle() {
+            this.isChecked = !this.isChecked;
+        }
+    },
+    watch: {
+        isChecked() {
+            this.$emit('update:modelValue', this.isChecked);
+        }
+    },
     data() {
         return {
-            isChecked: this.checked
+            isChecked: this.modelValue
         }
     }
 }

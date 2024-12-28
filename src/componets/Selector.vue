@@ -33,11 +33,18 @@ export default {
         options: {
             type: Array,
             default: []
+        },
+        modelValue: {
+            type: String,
+            default: ""
         }
     },
     data() {
         return {
-            selected: this.options[0],
+            /**
+             * @type {string}
+             */
+            selected: this.options.includes(this.modelValue) ? this.modelValue : this.options[0],
             opening: false
         };
     },
@@ -45,6 +52,11 @@ export default {
         select(option) {
             this.selected = option;
             this.opening = false;
+        }
+    },
+    watch: {
+        selected() {
+            this.$emit('update:modelValue', this.selected);
         }
     }
 }
