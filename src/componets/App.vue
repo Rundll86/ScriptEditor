@@ -11,6 +11,17 @@
     font-size: 16px;
 }
 
+body {
+    overflow: hidden;
+}
+
+input {
+    border: 2px solid gray;
+    border-radius: 5px;
+    padding: 3px 5px;
+    width: 100px;
+}
+
 span.label {
     font-size: 14px;
     display: inline-block;

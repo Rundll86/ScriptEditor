@@ -7,13 +7,13 @@
 .btn {
     min-width: 30px;
     height: 30px;
-    background-color: transparent;
-    padding: 3px 8px;
-    border-radius: 5px;
-    margin: 0px 5px;
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 4px 9px;
+    margin-left: 0 3px;
+    border: 1px solid gray;
 }
 
 .btn:hover {
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: rgba(0, 0, 0, 0.2);
 }
 </style>

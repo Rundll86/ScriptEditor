@@ -6,16 +6,26 @@
             <span :class="{
                 content: true,
                 label: !isText
-            }">{{ content }}</span>
+            }">{{ contentValue }}</span>
         </div>
         <div class="attrs" v-if="opening">
             Content:
-            <InputBox />
+            <input v-model="contentValue">
+            <div class="arg-only" v-if="!isText">
+                InputType:
+                <Selector :options="['String', 'Number', 'Boolean']" />
+                DefaultValue:
+                <InputBox />
+                UseLoader:
+                <Selector :options="['<Null>']" />
+                UseMenu:
+                <Selector :options="['<Null>']" />
+            </div>
         </div>
     </div>
 </template>
 <script setup>
-import InputBox from './InputBox.vue';
+import Selector from './Selector.vue';
 </script>
 <script>
 export default {
@@ -26,7 +36,8 @@ export default {
     },
     data() {
         return {
-            opening: this.open ?? false
+            opening: this.open ?? false,
+            contentValue: this.content
         };
     },
     methods: {
@@ -54,7 +65,14 @@ export default {
 
 .attrs {
     border-top: 1px solid gray;
-    padding: 3px 6px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.arg-only {
+    display: flex;
+    flex-direction: column;
 }
 
 .state {

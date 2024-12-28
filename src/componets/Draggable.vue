@@ -60,11 +60,11 @@ export default {
     position: absolute;
 }
 
-.draggable::v-deep [data-region]:hover {
+.draggable:deep([data-region]:hover) {
     cursor: move;
 }
 
-.draggable * {
+.draggable:deep([data-region]) {
     user-select: none;
 }
 </style>
