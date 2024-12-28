@@ -25,7 +25,6 @@ module.exports = {
                 test: /\.css$/i,
                 use: ["vue-style-loader", "css-loader"]
             },
-
             {
                 test: /\.ts$/i,
                 use: "ts-loader",
@@ -49,7 +48,10 @@ module.exports = {
     devServer: {
         static: ".",
         compress: true,
-        port: 19198
+        port: 19198,
+        client: {
+            logging: "none"
+        }
     },
     stats: "none"
 };

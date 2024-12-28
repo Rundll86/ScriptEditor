@@ -1,6 +1,6 @@
 <template>
     <div class="root">
-        <img :src="avatar" class="avatar">
+        <img :src="`/public/img/${name}.jpg`" class="avatar">
         <span class="name">{{ name }}</span>
         <span class="des">{{ des }}</span>
     </div>
@@ -8,10 +8,6 @@
 <script>
 export default {
     props: {
-        avatar: {
-            type: String,
-            default: ""
-        },
         name: {
             type: String,
             default: "UnknownMember"

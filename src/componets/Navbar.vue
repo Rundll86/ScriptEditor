@@ -1,6 +1,6 @@
 <template>
     <div class="bg">
-        <span class="logo">SolariiX</span>
+        <span class="logo">ExtMaker GUI</span>
     </div>
 </template>
 <style scoped>
@@ -9,18 +9,17 @@
     left: 0;
     top: 0;
     width: 100vw;
+    height: 29px;
     padding: 10px 0;
-    background-color: rgb(35, 35, 35);
+    background-color: rgb(235, 235, 235);
     color: white;
-}
-
-.bg * {
-    color: inherit;
+    border-bottom: 1px solid gray;
 }
 
 .logo {
     font-size: 20px;
     font-weight: bold;
     margin-left: 15px;
+    color: black;
 }
 </style>
