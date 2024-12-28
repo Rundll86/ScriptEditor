@@ -4,43 +4,56 @@
         <RightBox :blocks="blocks" />
     </div>
     <div class="high-layer">
-        <SubWindow title="Block Settings" :states="windowState" name="block">
+        <SubWindow title="积木配置" :states="windowState" name="block">
             <div class="args">
                 <span class="tip" v-if="parts.length === 0">
-                    There're not any parts.
+                    这个积木没有任何组件。
                 </span>
                 <ArgumentPart @remove="removePart" :index="index" :part="part" v-for="part, index in parts"
-                    :isText="part.isText" :content="part.content" />
+                    :isText="part.isText" :content="part.content" :key="index" />
             </div>
             <div class="config-bar">
-                Use decorator?
+                使用装饰器生成？
                 <CheckBox v-model="useDecorator" class="left-auto" />
             </div>
             <div class="config-bar">
-                Add parts
-                <WideButton class="left-auto" @click="addText">Text</WideButton>
-                <WideButton @click="addArg">Arg</WideButton>
+                添加组件
+                <WideButton class="left-auto" @click="addText">文本</WideButton>
+                <WideButton @click="addArg">参数框</WideButton>
             </div>
             <div class="config-bar">
-                Block opcode:
+                积木ID：
                 <input style="margin-left: 10px;" v-model="blockOpcode" :disabled="disabledOpcode">
-                <WideButton @click="autoOpcode">Auto</WideButton>
+                <WideButton @click="autoOpcode">自动计算</WideButton>
             </div>
             <div class="config-bar">
-                <WideButton class="left-auto" @click="saveBlock">Save</WideButton>
+                <WideButton class="left-auto" @click="saveBlock">保存</WideButton>
             </div>
         </SubWindow>
-        <SubWindow title="Loaders" :states="windowState" name="loaders">
-            testtesttest<br>
-            placeholder
+        <SubWindow title="参数加载器" :states="windowState" name="loaders">
+            占位<br>
+            placeholder<br>
+            （还没做）<br>
         </SubWindow>
-        <SubWindow title="Project" :states="windowState" name="project">
+        <SubWindow title="项目工具" :states="windowState" name="project">
             <div class="projs">
-                <WideButton @click="generatedCode">Generate</WideButton>
-                <WideButton>Export</WideButton>
-                <WideButton>Test in TurboWarp</WideButton>
-                <WideButton>Test in GandiIDE</WideButton>
+                <WideButton @click="generatedCode">生成原版代码</WideButton>
+                <WideButton>基于FS-Context输出（需要编译）</WideButton>
+                <WideButton>在TurboWarp测试</WideButton>
+                <WideButton>在GandiIDE测试</WideButton>
             </div>
+        </SubWindow>
+        <SubWindow center title="关于" :states="windowState" name="about">
+            ExtMaker是一个可零基础使用的界面Scratch拓展设计器。<br>
+            <div class="inline-left">
+                &lt;技术栈&gt; Vue3+Webpack<br>
+                &lt;开源许可&gt; MIT<br>
+                &lt;仓库&gt; <a href="https://github.com/Rundll86/ExtMakerGUI" target="_blank">Github</a>
+            </div><br>
+            [[ 特别鸣谢 ]]<br>
+            <Member name="VHS" des="创意/策划" /><br>
+            <Member name="FallingShrimp" des="界面开发" />
+            <Member name="Cyberexplorer" des="美术支持" />
         </SubWindow>
     </div>
 </template>
@@ -57,10 +70,6 @@
     top: 50px;
     width: calc(100vw - 30px);
     height: calc(100vh - 50px);
-}
-
-.left-auto {
-    margin-left: auto !important;
 }
 
 .args {
@@ -95,6 +104,24 @@
 .projs>.btn {
     margin: 5px;
 }
+
+.inline-left {
+    width: fit-content;
+    text-align: left;
+    display: inline-block;
+    margin: 10px 0;
+}
+
+a:link,
+a:visited {
+    color: rgb(30, 144, 255);
+    text-decoration: none;
+}
+
+a:hover,
+a:active {
+    text-decoration: underline;
+}
 </style>
 <script setup>
 import LeftBox from './LeftBox.vue';
@@ -103,6 +130,7 @@ import SubWindow from './SubWindow.vue';
 import ArgumentPart from './ArgumentPart.vue';
 import CheckBox from './CheckBox.vue';
 import WideButton from './WideButton.vue';
+import Member from "./Member.vue";
 import { toRaw } from 'vue';
 import md5 from 'md5';
 </script>
@@ -115,11 +143,13 @@ export default {
                 block: false,
                 menus: false,
                 loaders: false,
-                project: false
+                project: false,
+                about: false,
+                activing: ""
             },
             parts: [
                 {
-                    content: 'Alert',
+                    content: '弹窗',
                     isText: true
                 },
                 {
@@ -127,13 +157,13 @@ export default {
                     isText: false,
                     data: {
                         inputType: "String",
-                        defaultValue: "",
+                        defaultValue: "一些东西",
                         loader: null,
                         menu: null
                     }
                 },
                 {
-                    content: 'to window',
+                    content: '到浏览器窗口',
                     isText: true
                 }
             ],

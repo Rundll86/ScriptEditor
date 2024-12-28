@@ -43,6 +43,7 @@ export default {
             if (!Object.hasOwn(e.target.dataset, "region")) { return; };
             this.isDragging = true;
             this.lastMouseOffset = [e.clientX - this.position[0], e.clientY - this.position[1]];
+            this.$emit("dragstart");
         });
         window.addEventListener("mouseup", () => {
             this.isDragging = false;

@@ -1,12 +1,16 @@
 <template>
-    <Draggable ref="root" class="container" v-if="states?.[name] || false">
+    <Draggable ref="root" :class="{
+        container: true,
+        activing: states.activing === name
+    }" @dragstart="states.activing = name" v-if="states?.[name] || false">
         <div class="title-bar" data-region>
             <span class="title" data-region>{{ title }}</span>
-            <ToolBoxButton class="close-button" @click="close">
-                <Icon src="close.png" width="15" />
-            </ToolBoxButton>
+            <ToolBoxButton class="close-button" @click="close">◀</ToolBoxButton>
         </div>
-        <div class="content">
+        <div :class="{
+            content: true,
+            center
+        }">
             <slot></slot>
         </div>
     </Draggable>
@@ -18,6 +22,11 @@
     background-color: white;
     border: 1px solid gray;
     min-width: 250px;
+    z-index: 0;
+}
+
+.container.activing {
+    z-index: 1;
 }
 
 .title-bar {
@@ -31,13 +40,16 @@
     padding: 15px;
 }
 
+.content.center {
+    text-align: center;
+}
+
 .close-button {
     margin-left: auto;
 }
 </style>
 <script setup>
 import Draggable from './Draggable.vue';
-import Icon from './Icon.vue';
 import ToolBoxButton from './ToolBoxButton.vue';
 </script>
 <script>
@@ -45,7 +57,8 @@ export default {
     props: {
         title: String,
         states: Object,
-        name: String
+        name: String,
+        center: Boolean
     },
     methods: {
         close() {

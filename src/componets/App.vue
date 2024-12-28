@@ -30,6 +30,14 @@ span.label {
     background-color: rgba(0, 0, 0, 0.1);
     padding: 2px 5px;
 }
+
+.left-auto {
+    margin-left: auto !important;
+}
+
+.top-auto {
+    margin-top: auto !important;
+}
 </style>
 <script setup>
 import Navbar from './Navbar.vue';

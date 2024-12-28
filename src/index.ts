@@ -6,5 +6,5 @@ tools.declareGlobalVaribles({
     __VUE_PROD_DEVTOOLS__: false,
     __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false
 });
-let app = Vue.createApp(App);
+const app = Vue.createApp(App);
 app.mount("#app");

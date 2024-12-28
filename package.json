@@ -2,7 +2,8 @@
   "name": "ext-maker-gui",
   "scripts": {
     "dev": "webpack serve --mode development",
-    "dist": "webpack --mode production"
+    "dist": "webpack --mode production",
+    "lint": "eslint src"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

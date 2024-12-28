@@ -10,7 +10,7 @@
     position: fixed;
     right: 0;
     top: 50px;
-    height: 100vh;
+    height: calc(100vh - 50px);
     background-color: rgb(235, 235, 235);
     border-left: 1px solid gray;
     padding: 10px;

@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <div class="title-bar" @click="toggle">
-            <span class="type">{{ part.isText ? "Text" : "Arg" }}</span>
+            <span class="type">{{ part.isText ? "文本" : `${part.data.inputType}参数` }}</span>
             <span class="state">{{ opening ? "▼" : "▶" }}</span>
             <span :class="{
                 content: true,
@@ -9,17 +9,17 @@
             }">{{ part.content }}</span>
         </div>
         <div class="attrs" v-if="opening">
-            <WideButton @click="$emit('remove', index)">Remove</WideButton>
-            Content:
+            <WideButton @click="$emit('remove', index)">删除此组件</WideButton>
+            内容：
             <input v-model="part.content">
             <div class="arg-only" v-if="!part.isText">
-                Input type:
+                输入类型：
                 <Selector v-model="part.data.inputType" :options="['String', 'Number', 'Bool']" />
-                Default value:
+                默认值：
                 <input v-model="part.data.defaultValue">
-                Use loader:
+                使用参数加载器：
                 <Selector v-model="part.data.loader" :options="['<Null>', 'a', 'b']" />
-                Use menu:
+                使用菜单：
                 <Selector v-model="part.data.menu" :options="['<Null>', 'c', 'd']" />
             </div>
         </div>

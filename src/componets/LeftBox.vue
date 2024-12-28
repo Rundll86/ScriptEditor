@@ -2,36 +2,35 @@
     <div class="left-box">
         <div class="tools">
             <ToolBtn @click="openWindow('block')">
-                <!-- <Icon src="block.png" /> -->
-                Blok
+                <Icon src="block.svg" />
             </ToolBtn>
             <ToolBtn>
-                <!-- <Icon src="block.png" /> -->
-                Menu
+                <Icon src="menu.svg" />
             </ToolBtn>
             <ToolBtn @click="openWindow('loaders')">
-                <!-- <Icon src="block.png" /> -->
-                Load
+                <Icon src="loader.svg" />
             </ToolBtn>
             <ToolBtn>
-                <!-- <Icon src="block.png" /> -->
-                Data
+                <Icon src="dataStore.svg" />
             </ToolBtn>
             <ToolBtn>
-                <!-- <Icon src="block.png" /> -->
-                Pkg
+                <Icon src="package.svg" />
             </ToolBtn>
             <ToolBtn>
-                <!-- <Icon src="block.png" /> -->
-                Res
+                <Icon src="resource.svg" />
             </ToolBtn>
             <ToolBtn>
-                <!-- <Icon src="block.png" /> -->
-                Adv
+                <Icon src="advanced.svg" />
             </ToolBtn>
             <ToolBtn @click="openWindow('project')">
                 <!-- <Icon src="block.png" /> -->
                 Proj
+            </ToolBtn>
+            <ToolBtn class="top-auto">
+                <Icon src="plugin.svg" />
+            </ToolBtn>
+            <ToolBtn @click="openWindow('about')">
+                <Icon src="about.svg" />
             </ToolBtn>
         </div>
     </div>
@@ -45,7 +44,7 @@ import ToolBtn from './ToolBoxButton.vue';
     position: fixed;
     left: 0;
     top: 50px;
-    height: 100vh;
+    height: calc(100vh - 50px);
     background-color: rgb(235, 235, 235);
     border-right: 1px solid gray;
     display: flex;

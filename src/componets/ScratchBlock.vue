@@ -5,7 +5,7 @@
             borderColor: darken(color, 0.4),
         }">
             <span>
-                <span v-for="part in parsed">
+                <span v-for="part in parsed" :key="part.content">
                     <span v-if="part.type === 'text'" class="text">{{ part.content }}</span>
                     <span v-if="part.type === 'input'">
                         <input :value="part.value" :type="part.inputType === 'number' ? 'number' : 'text'"

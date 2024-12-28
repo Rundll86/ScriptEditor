@@ -27,22 +27,20 @@ export default {
 }
 
 .name {
-    color: white;
     font-weight: bold;
     font-size: 18px;
     margin-top: 5px;
 }
 
 .des {
-    color: white;
     margin-top: 5px;
 }
 
 .root {
-    display: flex;
+    display: inline-flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin: 30px;
+    margin: 10px;
 }
 </style>
