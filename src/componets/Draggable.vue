@@ -17,11 +17,11 @@ export default {
             type: Boolean,
             default: false
         },
-        startx: {
+        x: {
             type: Number,
             default: 0
         },
-        starty: {
+        y: {
             type: Number,
             default: 0
         }
@@ -37,7 +37,7 @@ export default {
          * @type {HTMLElement}
          */
         const draggable = this.$refs.target;
-        this.position = [this.startx, this.starty];
+        this.position = [this.x, this.y];
         this.lastMouseOffset = [window.mouse[0] - this.position[0], window.mouse[1] - this.position[1]];
         draggable.addEventListener("mousedown", (e) => {
             if (!Object.hasOwn(e.target.dataset, "region")) { return; };
@@ -47,12 +47,20 @@ export default {
         });
         window.addEventListener("mouseup", () => {
             this.isDragging = false;
+            this.$emit("dragend");
         });
         window.addEventListener("mousemove", (e) => {
             if (this.isDragging) {
                 this.position = [e.clientX - this.lastMouseOffset[0], e.clientY - this.lastMouseOffset[1]];
-            }
+                this.$emit("change");
+            };
         });
+    },
+    watch: {
+        position(value) {
+            this.$emit("update:x", value[0]);
+            this.$emit("update:y", value[1]);
+        }
     }
 };
 </script>

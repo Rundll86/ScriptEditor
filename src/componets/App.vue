@@ -9,6 +9,7 @@
     border: none;
     outline: none;
     font-size: 16px;
+    -webkit-user-drag: none;
 }
 
 body {
@@ -42,4 +43,11 @@ span.label {
 <script setup>
 import Navbar from './Navbar.vue';
 import Main from './Main.vue';
+</script>
+<script>
+export default {
+    mounted() {
+        window.addEventListener("dragstart", e => e.preventDefault(), false);
+    }
+}
 </script>

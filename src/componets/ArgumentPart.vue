@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <div class="title-bar" @click="toggle">
-            <span class="type">{{ part.isText ? "文本" : `${part.data.inputType}参数` }}</span>
+            <span class="type">{{ part.isText ? "文本" : `${argType}参数` }}</span>
             <span class="state">{{ opening ? "▼" : "▶" }}</span>
             <span :class="{
                 content: true,
@@ -14,13 +14,14 @@
             <input v-model="part.content">
             <div class="arg-only" v-if="!part.isText">
                 输入类型：
-                <Selector v-model="part.data.inputType" :options="['String', 'Number', 'Bool']" />
+                <Selector v-model="part.data.inputType" v-model:option="argType"
+                    :options="{ 字符串: 'string', 数字: 'number', 布尔值: 'bool' }" />
                 默认值：
                 <input v-model="part.data.defaultValue">
                 使用参数加载器：
-                <Selector v-model="part.data.loader" :options="['<Null>', 'a', 'b']" />
+                <Selector v-model="part.data.loader" :options="{ '<Null>': null, 'a': 'a', 'b': 'b' }" />
                 使用菜单：
-                <Selector v-model="part.data.menu" :options="['<Null>', 'c', 'd']" />
+                <Selector v-model="part.data.menu" :options="{ '<Null>': null, 'a': 'a', 'b': 'b' }" />
             </div>
         </div>
     </div>
@@ -38,7 +39,8 @@ export default {
     },
     data() {
         return {
-            opening: this.open ?? false
+            opening: this.open ?? false,
+            argType: "字符串"
         };
     },
     methods: {

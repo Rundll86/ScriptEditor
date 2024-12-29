@@ -23,13 +23,12 @@
                 <Icon src="advanced.svg" />
             </ToolBtn>
             <ToolBtn @click="openWindow('project')">
-                <!-- <Icon src="block.png" /> -->
-                Proj
+                <Icon src="project.svg" />
             </ToolBtn>
-            <ToolBtn class="top-auto">
-                <Icon src="plugin.svg" />
+            <ToolBtn @click="openWindow('node')">
+                <Icon src="node.svg" />
             </ToolBtn>
-            <ToolBtn @click="openWindow('about')">
+            <ToolBtn @click="openWindow('about')" class="top-auto">
                 <Icon src="about.svg" />
             </ToolBtn>
         </div>

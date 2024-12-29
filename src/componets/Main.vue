@@ -1,9 +1,13 @@
 <template>
+    <Stage ref="stage" />
     <div class="content">
         <LeftBox :blocks="blocks" :states="windowState" />
         <RightBox :blocks="blocks" />
     </div>
     <div class="high-layer">
+        <Node v-for="node in nodes" :id="'node-' + node.name" :key="node.name" :node="node" :finder="findNode"
+            v-model:x="node.position.x" v-model:y="node.position.y" :updaterRegister="(func) => updaters.push(func)"
+            @change="updateLines" :forceUpdater="updateLines" />
         <SubWindow title="积木配置" :states="windowState" name="block">
             <div class="args">
                 <span class="tip" v-if="parts.length === 0">
@@ -41,6 +45,12 @@
                 <WideButton>基于FS-Context输出（需要编译）</WideButton>
                 <WideButton>在TurboWarp测试</WideButton>
                 <WideButton>在GandiIDE测试</WideButton>
+            </div>
+        </SubWindow>
+        <SubWindow title="添加节点" :states="windowState" name="node">
+            <div class="projs">
+                <WideButton @click="addNormalNode">普通节点</WideButton>
+                <WideButton @click="addEntryNode">入口点</WideButton>
             </div>
         </SubWindow>
         <SubWindow center title="关于" :states="windowState" name="about">
@@ -131,14 +141,27 @@ import ArgumentPart from './ArgumentPart.vue';
 import CheckBox from './CheckBox.vue';
 import WideButton from './WideButton.vue';
 import Member from "./Member.vue";
+import Stage from './Stage.vue';
 import { toRaw } from 'vue';
 import md5 from 'md5';
+import { Drawing } from "../tools";
+import { Vector } from '../types/structs';
+import Node from './Node.vue';
 </script>
 <script>
 export default {
+    mounted() {
+        Drawing.initWith(this.$refs.stage.$el);
+        this.$nextTick(() => {
+            this.updateLines();
+        });
+    },
     data() {
         return {
             blocks: [],
+            nodes: [],
+            blocks: [],
+            updaters: [],
             windowState: {
                 block: false,
                 menus: false,
@@ -173,6 +196,21 @@ export default {
         };
     },
     methods: {
+        updateLines() {
+            Drawing.clear();
+            this.updaters.forEach(updater => updater());
+        },
+        findNode(name) {
+            const found = this.nodes.find(node => node.name === name);
+            if (found) {
+                return {
+                    data: this.nodes.find(node => node.name === name),
+                    el: document.getElementById("node-" + name)
+                };
+            } else {
+                return null;
+            };
+        },
         addText() {
             this.parts.push({
                 content: "new text",
@@ -275,6 +313,27 @@ export default {
             const generated = await response.text();
             navigator.clipboard.writeText(generated);
             alert("已复制")
+        },
+        generatedRandomNodeName() {
+            let result = "node" + Math.floor(Math.random() * 1000000);
+            while (this.findNode(result)) { result = "node" + Math.floor(Math.random() * 1000000); };
+            return result;
+        },
+        addNormalNode() {
+            this.nodes.push({
+                isEntry: false,
+                name: this.generatedRandomNodeName(),
+                next: null,
+                position: new Vector(100, 100)
+            });
+        },
+        addEntryNode() {
+            this.nodes.push({
+                isEntry: true,
+                name: this.generatedRandomNodeName(),
+                next: null,
+                position: new Vector(100, 100)
+            });
         }
     }
 }
