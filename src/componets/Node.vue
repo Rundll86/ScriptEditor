@@ -7,7 +7,7 @@
             </div>
             <div class="content">
                 节点名称：
-                <input v-model="node.name">
+                <input v-model="node.name" class="name">
                 <div v-if="!node.isEntry">
                     调用方法名：
                     <Selector :options="keyMirror(...windowKeys)" />
@@ -28,6 +28,10 @@
     background-color: rgba(0, 0, 0, 0.05);
 }
 
+.node * {
+    text-wrap: nowrap;
+}
+
 .title-bar {
     display: flex;
     align-items: center;
@@ -35,7 +39,9 @@
     border-bottom: 1px solid gray;
     background-color: rgba(0, 0, 0, 0.1);
 }
-
+.name{
+    margin: 5px 0;
+}
 .content {
     padding: 20px;
 }
