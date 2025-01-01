@@ -10,8 +10,7 @@
                 <input v-model="node.name">
                 <div v-if="!node.isEntry">
                     调用方法名：
-                    <Selector
-                        :options="keyMirror('window.alert', 'console.log', 'abcdefg', '1234567', 'fsfesafwagfee')" />
+                    <Selector :options="keyMirror(...windowKeys)" />
                 </div>
                 <div v-if="node.isEntry">
                     入口节点不能调用方法。
@@ -88,14 +87,13 @@ export default {
                     clientHeight: 0
                 });
             } else if (this.myNext) {
-                Drawing.bezierConnectElement(this.$refs.out, this.nextPointElement, "edge");
+                Drawing.bezierConnectElement(this.$refs.out, this.nextPointElement, "center");
             };
         });
         window.addEventListener("mouseup", (e) => {
             if (this.amIConnecting) {
                 if (e.target.matches(".node[data-is-entry=false] [data-node]")) {
                     const node = this.finder(e.target.dataset.node);
-                    console.log(node);
                     if (node) {
                         this.node.next = node.data.name;
                         this.myNext = node;
@@ -118,6 +116,14 @@ export default {
     computed: {
         nextPointElement() {
             return this.myNext.el.querySelector('.in.point')
+        },
+        windowKeys() {
+            return Object.keys(window).filter(key => (
+                !key.includes("__VUE_")
+                && !key.includes("webpack")
+                && !key.includes("devtool")
+                && window[key] instanceof Function
+            ));
         }
     },
     methods: {

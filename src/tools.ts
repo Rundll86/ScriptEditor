@@ -86,6 +86,25 @@ export namespace Drawing {
         context.lineTo(arrowLine2.x2, arrowLine2.y2);
         context.stroke();
     };
+    export function straightConnect(a: Vector, b: Vector, withArrow: boolean = true) {
+        context.beginPath();
+        context.moveTo(a.x, a.y);
+        context.lineTo(b.x, b.y);
+        context.stroke();
+        context.closePath();
+        if (withArrow) drawArrow(b, a);
+    };
+    export function straightConnectElement(a: HTMLElement, b: HTMLElement, withArrow: boolean = true) {
+        let centerA: Vector;
+        centerA = new Vector(a.getBoundingClientRect().left, a.getBoundingClientRect().top);
+        centerA.x += (a.clientWidth + lineWidth) / 2;
+        centerA.y += (a.clientHeight + lineWidth) / 2;
+        let centerB: Vector;
+        centerB = new Vector(b.getBoundingClientRect().left, b.getBoundingClientRect().top);
+        centerB.x += (b.clientWidth + lineWidth) / 2;
+        centerB.y += (b.clientHeight + lineWidth) / 2;
+        straightConnect(centerA, centerB, withArrow);
+    }
     export function bezierConnect(a: Vector, b: Vector, withArrow: boolean = true) {
         const { control1, control2 } = calcControl(a, b);
         context.beginPath();

@@ -39,12 +39,75 @@
             placeholder<br>
             （还没做）<br>
         </SubWindow>
-        <SubWindow title="项目工具" :states="windowState" name="project">
+        <SubWindow title="项目" :states="windowState" name="project">
             <div class="projs">
-                <WideButton @click="generatedCode">生成原版代码</WideButton>
-                <WideButton>基于FS-Context输出（需要编译）</WideButton>
-                <WideButton>在TurboWarp测试</WideButton>
-                <WideButton>在GandiIDE测试</WideButton>
+                <WideButton @click="contextMenuState.project = true">
+                    文件
+                    <ContextMenu :show="contextMenuState.project" :items="[
+                        {
+                            name: '保存到本地',
+                            click() {
+                                save();
+                            },
+                            sub: [
+                                {
+                                    name: '多文件',
+                                    sub: [
+                                        {
+                                            name: '.json+资源 - 标准格式'
+                                        },
+                                        {
+                                            name: '.xml+.js - 数据+资源'
+                                        }
+                                    ]
+                                },
+                                {
+                                    name: '单文件',
+                                    sub: [
+                                        {
+                                            name: '.zip - 简单压缩包'
+                                        },
+                                        {
+                                            name: '.emp - ExtMaker标准格式',
+                                            sub:[
+                                                {
+                                                    name: '.emp - 不加密'
+                                                },
+                                                {
+                                                    name: '.empc - 加密'
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            name: '.fse - 更优雅的储存方式，需要FS-Context v2'
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            name: '从本地加载',
+                            click() {
+                                console.log('打开')
+                            }
+                        },
+                        {
+                            name: '（实验）从项目服务器加载',
+                            click() {
+                                console.log('load from server')
+                            }
+                        }
+                    ]" />
+                </WideButton>
+                <span :class="{
+                    'tip': true,
+                    'error': serverState === 'error',
+                    'ok': serverState === 'ok',
+                    'loading': serverState === 'loading',
+                    'unknown': serverState === 'unknown'
+                }">{{ serverStateMap }}</span>
+                <WideButton :disabled="!canUseServer">打包：原版，无需编译</WideButton>
+                <WideButton :disabled="!canUseServer">打包：基于FS-Context框架</WideButton>
             </div>
         </SubWindow>
         <SubWindow title="添加节点" :states="windowState" name="node">
@@ -61,9 +124,10 @@
                 &lt;仓库&gt; <a href="https://github.com/Rundll86/ExtMakerGUI" target="_blank">Github</a>
             </div><br>
             [[ 特别鸣谢 ]]<br>
-            <Member name="VHS" des="创意/策划" /><br>
+            <Member name="VHS" des="创意/策划" />
             <Member name="FallingShrimp" des="界面开发" />
             <Member name="Cyberexplorer" des="美术支持" />
+            <Member name="叶睿杰" des="优化建议" />
         </SubWindow>
     </div>
 </template>
@@ -76,10 +140,8 @@
 .high-layer {
     z-index: 10;
     position: absolute;
-    left: 30px;
-    top: 50px;
-    width: calc(100vw - 30px);
-    height: calc(100vh - 50px);
+    left: 0;
+    top: 0;
 }
 
 .args {
@@ -95,11 +157,26 @@
     margin: 5px;
 }
 
+.tip.error {
+    color: red;
+}
+
+.tip.ok {
+    color: green;
+}
+
+.tip.loading {
+    color: black;
+}
+
+.tip.unknown {
+    color: blueviolet;
+}
+
 .config-bar {
     display: flex;
     align-items: center;
     margin: 5px 0;
-    text-wrap: nowrap;
 }
 
 .config-bar>* {
@@ -147,6 +224,7 @@ import md5 from 'md5';
 import { Drawing } from "../tools";
 import { Vector } from '../types/structs';
 import Node from './Node.vue';
+import ContextMenu from './ContextMenu.vue';
 </script>
 <script>
 export default {
@@ -155,12 +233,46 @@ export default {
         this.$nextTick(() => {
             this.updateLines();
         });
+        fetch(this.buildServerHost() + "/ping")
+            .then(e => e.json())
+            .then(e => {
+                console.log(e);
+                if (this.isValidBuildServer(e)) {
+                    this.serverState = "ok"
+                } else {
+                    this.serverState = "unknown";
+                };
+            })
+            .catch(() => {
+                this.serverState = "error";
+            });
+    },
+    computed: {
+        serverStateMap() {
+            return ({
+                loading: "正在" + this.serverStateSuffix,
+                ok: "已" + this.serverStateSuffix,
+                error: "无法" + this.serverStateSuffix,
+                unknown: "无法识别的项目服务器"
+            })[this.serverState];
+        },
+        canUseServer() {
+            return ["ok", "unknown"].includes(this.serverState);
+        },
+        saveData() {
+            return JSON.stringify({
+                blocks: this.blocks,
+                nodes: this.nodes,
+                currentBlock: this.currentBlock()
+            });
+        }
     },
     data() {
         return {
+            serverStateSuffix: "连接到项目服务器",
+            serverState: "loading", //loading, ok, error, unknown
             blocks: [],
             nodes: [],
-            blocks: [],
             updaters: [],
             windowState: {
                 block: false,
@@ -169,6 +281,9 @@ export default {
                 project: false,
                 about: false,
                 activing: ""
+            },
+            contextMenuState: {
+                project: false,
             },
             parts: [
                 {
@@ -196,6 +311,16 @@ export default {
         };
     },
     methods: {
+        save() {
+            console.log(this.saveData);
+        },
+        isValidBuildServer(pingMessage) {
+            return (
+                pingMessage.is === "em-project-server"
+                && pingMessage.status === "running"
+                && pingMessage.message === "pong"
+            );
+        },
         updateLines() {
             Drawing.clear();
             this.updaters.forEach(updater => updater());

@@ -15,7 +15,7 @@
             <div class="arg-only" v-if="!part.isText">
                 输入类型：
                 <Selector v-model="part.data.inputType" v-model:option="argType"
-                    :options="{ 字符串: 'string', 数字: 'number', 布尔值: 'bool' }" />
+                    :options="{ '字符串': 'string', '数字': 'number', '布尔值': 'bool' }" />
                 默认值：
                 <input v-model="part.data.defaultValue">
                 使用参数加载器：

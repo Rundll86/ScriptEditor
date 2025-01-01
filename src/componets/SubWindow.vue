@@ -25,6 +25,10 @@
     z-index: 0;
 }
 
+.container * {
+    text-wrap: nowrap;
+}
+
 .container.activing {
     z-index: 1;
 }

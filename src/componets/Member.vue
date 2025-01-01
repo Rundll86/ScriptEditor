@@ -41,6 +41,6 @@ export default {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin: 10px;
+    margin: 15px;
 }
 </style>

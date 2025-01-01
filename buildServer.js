@@ -36,6 +36,18 @@ app.post("/api", (req, res) => {
     }).join("\n" + " ".repeat(4).repeat(2)));
     res.send(result);
 });
+app.get("/api/ping", (req, res) => {
+    res.send({
+        is: "em-project-server",
+        version: "1.0.0",
+        status: "running",
+        apis: [
+            "/api",
+            "/api/ping"
+        ],
+        message: "pong"
+    });
+});
 app.listen(1145, "0.0.0.0", () => {
     console.log("Build server is running on port 1145");
 });
