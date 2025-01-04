@@ -17,7 +17,7 @@
             options: true,
             open: opening
         }">
-            <div v-for="option in Object.keys(options)">
+            <div v-for="option in Object.keys(options)" :key="option">
                 <div class="option" v-if="option.includes(searchText)" :key="option" @click="select(options[option])">
                     <span :class="{
                         state: true,
@@ -31,7 +31,7 @@
     </div>
 </template>
 <script setup>
-import ToolBoxButton from './ToolBoxButton.vue';
+import ToolBoxButton from "./ToolBoxButton.vue";
 </script>
 <script>
 export default {
@@ -68,8 +68,8 @@ export default {
     },
     watch: {
         selected() {
-            this.$emit('update:modelValue', this.selected);
-            this.$emit('update:option', this.optionName);
+            this.$emit("update:modelValue", this.selected);
+            this.$emit("update:option", this.optionName);
         }
     },
     computed: {

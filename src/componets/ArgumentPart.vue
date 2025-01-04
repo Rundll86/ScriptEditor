@@ -27,8 +27,8 @@
     </div>
 </template>
 <script setup>
-import Selector from './Selector.vue';
-import WideButton from './WideButton.vue';
+import Selector from "./Selector.vue";
+import WideButton from "./WideButton.vue";
 </script>
 <script>
 export default {

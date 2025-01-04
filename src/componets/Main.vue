@@ -211,20 +211,20 @@ a:active {
 }
 </style>
 <script setup>
-import LeftBox from './LeftBox.vue';
-import RightBox from './RightBox.vue';
-import SubWindow from './SubWindow.vue';
-import ArgumentPart from './ArgumentPart.vue';
-import CheckBox from './CheckBox.vue';
-import WideButton from './WideButton.vue';
+import LeftBox from "./LeftBox.vue";
+import RightBox from "./RightBox.vue";
+import SubWindow from "./SubWindow.vue";
+import ArgumentPart from "./ArgumentPart.vue";
+import CheckBox from "./CheckBox.vue";
+import WideButton from "./WideButton.vue";
 import Member from "./Member.vue";
-import Stage from './Stage.vue';
-import { toRaw } from 'vue';
-import md5 from 'md5';
+import Stage from "./Stage.vue";
+import { toRaw } from "vue";
+import md5 from "md5";
 import { Drawing } from "../tools";
-import { Vector } from '../types/structs';
-import Node from './Node.vue';
-import ContextMenu from './ContextMenu.vue';
+import { Vector } from "../types/structs";
+import Node from "./Node.vue";
+import ContextMenu from "./ContextMenu.vue";
 </script>
 <script>
 export default {
@@ -287,11 +287,11 @@ export default {
             },
             parts: [
                 {
-                    content: '弹窗',
+                    content: "弹窗",
                     isText: true
                 },
                 {
-                    content: 'something',
+                    content: "something",
                     isText: false,
                     data: {
                         inputType: "String",
@@ -301,7 +301,7 @@ export default {
                     }
                 },
                 {
-                    content: '到浏览器窗口',
+                    content: "到浏览器窗口",
                     isText: true
                 }
             ],
@@ -347,7 +347,7 @@ export default {
                 content: "argName",
                 isText: false,
                 data: {
-                    inputType: "String",
+                    inputType: "string",
                     defaultValue: "",
                     loader: null,
                     menu: null

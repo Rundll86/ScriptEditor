@@ -3,19 +3,19 @@
         root: true,
         sub
     }" v-if="show">
-        <div v-for="item in items" class="menu" @click="click(item)">
+        <div v-for="item in items" class="menu" @click="click(item)" :key="item">
             {{ item.name }}
             <ContextMenu sub
              :show="current === item.name && item.sub?.length > 0"
               :items="item.sub"
-               @click.native.stop>
+               @click.stop>
             </ContextMenu>
         </div>
     </div>
 </template>
 <script>
 export default {
-    name: 'ContextMenu',
+    name: "ContextMenu",
     props: {
         items: {
             type: Array,

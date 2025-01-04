@@ -12,14 +12,14 @@ canvas {
 }
 </style>
 <script setup>
-import { Drawing } from '../tools';
+import { Drawing } from "../tools";
 </script>
 <script>
-const contentCanvas = document.createElement('canvas');
+const contentCanvas = document.createElement("canvas");
 export default {
     mounted() {
         this.reloadSize();
-        window.addEventListener('resize', () => this.reloadSize());
+        window.addEventListener("resize", () => this.reloadSize());
     },
     methods: {
         reloadSize() {
@@ -32,13 +32,13 @@ export default {
             let canvas = this.$el;
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            canvas.getContext('2d').drawImage(contentCanvas, 0, 0, contentCanvas.width, contentCanvas.height);
+            canvas.getContext("2d").drawImage(contentCanvas, 0, 0, contentCanvas.width, contentCanvas.height);
             Drawing.initWith(canvas);
         }
     },
     data() {
         return {
-            contentContext: contentCanvas.getContext('2d')
+            contentContext: contentCanvas.getContext("2d")
         };
     }
 }

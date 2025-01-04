@@ -56,6 +56,7 @@ export function keyMirror(...keys: string[]) {
     });
     return result;
 };
+export function unused<T>(data: T) { return data; };
 export namespace Drawing {
     let stageCanvas: HTMLCanvasElement;
     let context: CanvasRenderingContext2D;
@@ -95,16 +96,14 @@ export namespace Drawing {
         if (withArrow) drawArrow(b, a);
     };
     export function straightConnectElement(a: HTMLElement, b: HTMLElement, withArrow: boolean = true) {
-        let centerA: Vector;
-        centerA = new Vector(a.getBoundingClientRect().left, a.getBoundingClientRect().top);
+        const centerA: Vector = new Vector(a.getBoundingClientRect().left, a.getBoundingClientRect().top);
         centerA.x += (a.clientWidth + lineWidth) / 2;
         centerA.y += (a.clientHeight + lineWidth) / 2;
-        let centerB: Vector;
-        centerB = new Vector(b.getBoundingClientRect().left, b.getBoundingClientRect().top);
+        const centerB: Vector = new Vector(b.getBoundingClientRect().left, b.getBoundingClientRect().top);
         centerB.x += (b.clientWidth + lineWidth) / 2;
         centerB.y += (b.clientHeight + lineWidth) / 2;
         straightConnect(centerA, centerB, withArrow);
-    }
+    };
     export function bezierConnect(a: Vector, b: Vector, withArrow: boolean = true) {
         const { control1, control2 } = calcControl(a, b);
         context.beginPath();
@@ -115,15 +114,13 @@ export namespace Drawing {
         if (withArrow) drawArrow(b, control2);
     };
     export function bezierConnectElement(a: HTMLElement, b: HTMLElement, distMode: "center" | "edge" = "center") {
-        let centerA: Vector;
-        centerA = new Vector(a.getBoundingClientRect().left, a.getBoundingClientRect().top);
+        const centerA: Vector = new Vector(a.getBoundingClientRect().left, a.getBoundingClientRect().top);
         centerA.x += (a.clientWidth + lineWidth) / 2;
         centerA.y += (a.clientHeight + lineWidth) / 2;
-        let centerB: Vector;
-        centerB = new Vector(b.getBoundingClientRect().left, b.getBoundingClientRect().top);
+        const centerB: Vector = new Vector(b.getBoundingClientRect().left, b.getBoundingClientRect().top);
         centerB.x += (b.clientWidth + lineWidth) / 2;
         centerB.y += (b.clientHeight + lineWidth) / 2;
-        let start: Vector = centerA;
+        const start: Vector = centerA;
         let end: Vector | null = null;
         if (distMode === "center") {
             end = new Vector(b.getBoundingClientRect().left, b.getBoundingClientRect().top);
@@ -133,7 +130,7 @@ export namespace Drawing {
             const { control1, control2 } = calcControl(centerA, centerB);
             end = findClosestBezierCircleIntersection(centerA, control1, control2, centerB, centerB, b.offsetWidth / 2);
         } else {
-            const _: never = distMode;
+            unused<never>(distMode);
         };
         if (start && end) {
             bezierConnect(start, end);

@@ -17,7 +17,7 @@
     </div>
 </template>
 <script>
-import { watch } from 'vue';
+import { watch } from "vue";
 class ArgumentPart {
     content = "";
     type = "text";
@@ -100,7 +100,7 @@ const TextParser = {
     }
 };
 export default {
-    name: 'ScratchBlock',
+    name: "ScratchBlock",
     mounted() {
         this.reloadParts();
         watch(
@@ -128,15 +128,15 @@ export default {
             for (let i = 0; i < 3; i++) {
                 rgb[i] = Math.floor(rgb[i] - (rgb[i] * level))
             };
-            return `#${rgb.map((i) => i.toString(16).padStart(2, "0")).join('')}`;
+            return `#${rgb.map((i) => i.toString(16).padStart(2, "0")).join("")}`;
         },
         hexToRgb(str) {
             let hexs = [];
             const reg = /^#?[0-9A-Fa-f]{6}$/;
-            if (!reg.test(str)) throw new Error('Invalid hex color string');
-            str = str.replace('#', '');
+            if (!reg.test(str)) throw new Error("Invalid hex color string");
+            str = str.replace("#", "");
             hexs = str.match(/../g) || [];
-            if (hexs.length < 3) throw new Error('Invalid hex color string');
+            if (hexs.length < 3) throw new Error("Invalid hex color string");
             return [parseInt(hexs[0], 16), parseInt(hexs[1], 16), parseInt(hexs[2], 16)];
         },
         reloadParts() {

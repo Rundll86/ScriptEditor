@@ -35,9 +35,8 @@
     </div>
 </template>
 <script setup>
-import ContextMenu from './ContextMenu.vue';
-import Icon from './Icon.vue';
-import ToolBtn from './ToolBoxButton.vue';
+import Icon from "./Icon.vue";
+import ToolBtn from "./ToolBoxButton.vue";
 </script>
 <style scoped>
 .left-box {

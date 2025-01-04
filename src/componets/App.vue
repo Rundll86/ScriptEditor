@@ -41,8 +41,8 @@ span.label {
 }
 </style>
 <script setup>
-import Navbar from './Navbar.vue';
-import Main from './Main.vue';
+import Navbar from "./Navbar.vue";
+import Main from "./Main.vue";
 </script>
 <script>
 export default {

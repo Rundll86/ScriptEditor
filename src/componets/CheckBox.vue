@@ -48,7 +48,7 @@ export default {
     },
     watch: {
         isChecked() {
-            this.$emit('update:modelValue', this.isChecked);
+            this.$emit("update:modelValue", this.isChecked);
         }
     },
     data() {

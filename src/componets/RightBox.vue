@@ -29,5 +29,5 @@ export default {
 }
 </script>
 <script setup>
-import ScratchBlock from './ScratchBlock.vue';
+import ScratchBlock from "./ScratchBlock.vue";
 </script>

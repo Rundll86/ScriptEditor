@@ -53,8 +53,8 @@
 }
 </style>
 <script setup>
-import Draggable from './Draggable.vue';
-import ToolBoxButton from './ToolBoxButton.vue';
+import Draggable from "./Draggable.vue";
+import ToolBoxButton from "./ToolBoxButton.vue";
 </script>
 <script>
 export default {

@@ -66,9 +66,9 @@
 }
 </style>
 <script setup>
-import Draggable from './Draggable.vue';
-import { Drawing, keyMirror } from '../tools';
-import Selector from './Selector.vue';
+import Draggable from "./Draggable.vue";
+import { Drawing, keyMirror } from "../tools";
+import Selector from "./Selector.vue";
 </script>
 <script>
 export default {
@@ -121,7 +121,7 @@ export default {
     },
     computed: {
         nextPointElement() {
-            return this.myNext.el.querySelector('.in.point')
+            return this.myNext.el.querySelector(".in.point")
         },
         windowKeys() {
             return Object.keys(window).filter(key => (
