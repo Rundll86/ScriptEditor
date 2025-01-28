@@ -4,4 +4,5 @@ declare module "*.vue" {
 }
 declare interface Window {
     mouse: [number, number];
+    dragging: boolean;
 }

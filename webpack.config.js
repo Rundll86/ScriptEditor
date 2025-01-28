@@ -20,7 +20,12 @@ module.exports = {
         rules: [
             {
                 test: /\.vue$/i,
-                use: "vue-loader"
+                use: {
+                    loader: "vue-loader",
+                    options: {
+                        defaultScriptLang: 'ts'
+                    }
+                }
             },
             {
                 test: /\.css$/i,
@@ -28,7 +33,13 @@ module.exports = {
             },
             {
                 test: /\.ts$/i,
-                use: "ts-loader",
+                use: {
+                    loader: "ts-loader",
+                    options: {
+                        appendTsSuffixTo: [/\.vue$/i],
+                        transpileOnly: true
+                    }
+                },
                 exclude: /\.d\.ts$/i
             },
             {

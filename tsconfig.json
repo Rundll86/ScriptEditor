@@ -3,14 +3,20 @@
         "skipLibCheck": true,
         "target": "ESNext",
         "module": "ESNext",
-        "moduleResolution": "bundler",
+        "moduleResolution": "node",
         "strict": true,
         "resolveJsonModule": true,
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
-        "outDir": "generated"
+        "types": [
+            "vue",
+            "node",
+            "webpack"
+        ],
+        "baseUrl": "."
     },
     "include": [
-        "./src/**/*.ts"
+        "src/**/*.ts",
+        "src/**/*.vue"
     ]
 }

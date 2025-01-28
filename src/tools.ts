@@ -36,27 +36,50 @@ export function findClosestBezierCircleIntersection(
     };
     return closestIntersection;
 };
-export function calcControl(a: Vector, b: Vector, offsetMulitplier: number = 0.2) {
-    const distance = Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2));
-    const offset = distance * offsetMulitplier;
-    const control1 = {
-        x: a.x + (b.x - a.x) / 3 + offset,
-        y: a.y + (b.y - a.y) / 3 - offset
-    };
-    const control2 = {
-        x: b.x - (b.x - a.x) / 3 - offset,
-        y: b.y - (b.y - a.y) / 3 + offset
+export function calcControl(
+    a: Vector,
+    b: Vector,
+    offsetMulitplier: number = 0.5,
+    mode: "vertical" | "horizontal" | "ease" = "vertical"
+): Record<"control1" | "control2", Vector> {
+    const control1 = new Vector(0, 0);
+    const control2 = new Vector(0, 0);
+    if (mode === "ease") {
+        const distance = Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2));
+        const offset = distance * offsetMulitplier;
+        control1.x = a.x + (b.x - a.x) / 3 + offset;
+        control1.y = a.y + (b.y - a.y) / 3 - offset;
+        control2.x = b.x - (b.x - a.x) / 3 - offset;
+        control2.y = b.y - (b.y - a.y) / 3 + offset;
+    } else if (mode === "vertical") {
+        control1.x = a.x + (b.x - a.x) * offsetMulitplier;
+        control1.y = a.y;
+        control2.x = b.x - (b.x - a.x) * offsetMulitplier;
+        control2.y = b.y;
+    } else if (mode === "horizontal") {
+        control1.x = a.x;
+        control1.y = a.y + (b.y - a.y) * offsetMulitplier;
+        control2.x = b.x;
+        control2.y = b.y - (b.y - a.y) * offsetMulitplier;
+    } else {
+        unused<never>(mode);
     };
     return { control1, control2 };
 };
-export function keyMirror(...keys: string[]) {
+export function keyMirror(...keys: (string | string[])[]) {
     const result: any = {};
     keys.forEach(key => {
-        result[key] = key;
+        if (typeof key === 'string') {
+            result[key] = key;
+        } else {
+            key.forEach(key => {
+                result[key] = key;
+            });
+        };
     });
     return result;
 };
-export function unused<T>(data: T) { return data; };
+export function unused<T>(data: T): T { return data; };
 export namespace Drawing {
     let stageCanvas: HTMLCanvasElement;
     let context: CanvasRenderingContext2D;
@@ -113,7 +136,14 @@ export namespace Drawing {
         context.closePath();
         if (withArrow) drawArrow(b, control2);
     };
-    export function bezierConnectElement(a: HTMLElement, b: HTMLElement, distMode: "center" | "edge" = "center") {
+    export function bezierConnectElement(a: HTMLElement, b: {
+        getBoundingClientRect: () => {
+            left: number;
+            top: number;
+        };
+        clientWidth: number;
+        clientHeight: number;
+    }, distMode: "center" | "edge" = "center") {
         const centerA: Vector = new Vector(a.getBoundingClientRect().left, a.getBoundingClientRect().top);
         centerA.x += (a.clientWidth + lineWidth) / 2;
         centerA.y += (a.clientHeight + lineWidth) / 2;
@@ -128,7 +158,7 @@ export namespace Drawing {
             end.y += (b.clientHeight + lineWidth) / 2;
         } else if (distMode === "edge") {
             const { control1, control2 } = calcControl(centerA, centerB);
-            end = findClosestBezierCircleIntersection(centerA, control1, control2, centerB, centerB, b.offsetWidth / 2);
+            end = findClosestBezierCircleIntersection(centerA, control1, control2, centerB, centerB, b.clientWidth / 2);
         } else {
             unused<never>(distMode);
         };

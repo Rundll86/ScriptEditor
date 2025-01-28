@@ -3,8 +3,11 @@
         <slot></slot>
     </div>
 </template>
-<script>
-export default {
+<script setup lang="ts">
+import { defineComponent } from 'vue';
+</script>
+<script lang="ts">
+export default defineComponent({
     data() {
         return {
             position: [0, 0],
@@ -33,19 +36,24 @@ export default {
                 window.mouse = [e.clientX, e.clientY];
             });
         };
-        /**
-         * @type {HTMLElement}
-         */
-        const draggable = this.$refs.target;
+        const draggable: HTMLElement = this.$refs.target as HTMLElement;
         this.position = [this.x, this.y];
         this.lastMouseOffset = [window.mouse[0] - this.position[0], window.mouse[1] - this.position[1]];
-        draggable.addEventListener("mousedown", (e) => {
-            if (!Object.hasOwn(e.target.dataset, "region")) { return; };
-            this.isDragging = true;
-            this.lastMouseOffset = [e.clientX - this.position[0], e.clientY - this.position[1]];
-            this.$emit("dragstart");
+        draggable.addEventListener("mousedown", e => {
+            if (
+                e.target
+                && e.target instanceof HTMLElement
+                && e.target.matches("[data-region] *, [data-region]")
+                && !e.target.matches("[data-no-region]")
+            ) {
+                window.dragging = true;
+                this.isDragging = true;
+                this.lastMouseOffset = [e.clientX - this.position[0], e.clientY - this.position[1]];
+                this.$emit("dragstart");
+            };
         });
         window.addEventListener("mouseup", () => {
+            window.dragging = false;
             this.isDragging = false;
             this.$emit("dragend");
         });
@@ -62,10 +70,11 @@ export default {
             this.$emit("update:y", value[1]);
         }
     }
-};
+});
 </script>
 <style scoped>
 .draggable {
+    transition: none;
     position: absolute;
 }
 

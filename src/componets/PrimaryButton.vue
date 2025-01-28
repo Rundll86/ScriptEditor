@@ -5,11 +5,11 @@
 </template>
 <style scoped>
 .btn {
-    min-width: 30px;
     background-color: rgba(0, 0, 0, 0.1);
-    padding: 2px 5px;
-    margin: 3px;
+    padding: 1px 5px;
     border: 1px solid gray;
+    font-size: 13px;
+    margin: 2px 0;
 }
 
 .btn:hover {

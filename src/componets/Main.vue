@@ -1,143 +1,102 @@
 <template>
     <Stage ref="stage" />
     <div class="content">
-        <LeftBox :blocks="blocks" :states="windowState" />
-        <RightBox :blocks="blocks" />
+        <LeftBox :states="windowState" />
     </div>
-    <div class="high-layer">
-        <Node v-for="node in nodes" :id="'node-' + node.name" :key="node.name" :node="node" :finder="findNode"
-            v-model:x="node.position.x" v-model:y="node.position.y" :updaterRegister="(func) => updaters.push(func)"
-            @change="updateLines" :forceUpdater="updateLines" />
-        <SubWindow title="积木配置" :states="windowState" name="block">
-            <div class="args">
-                <span class="tip" v-if="parts.length === 0">
-                    这个积木没有任何组件。
-                </span>
-                <ArgumentPart @remove="removePart" :index="index" :part="part" v-for="part, index in parts"
-                    :isText="part.isText" :content="part.content" :key="index" />
+    <div class="high-layer" :style="{
+        left: highLayerPosition.x + 'px',
+        top: highLayerPosition.y + 'px'
+    }">
+        <Node v-for="node, index in nodes" :id="'node-' + node.name" :key="node.name" :node="node" :finder="findNode"
+            v-model:x="node.position.x" v-model:y="node.position.y"
+            :updaterRegister="(func: NodeUpdater) => updaters.push(func)" @change="updateLines"
+            :forceUpdater="updateLines" :characters="characters" :feelings="feelings" :scripts="scripts"
+            @remove="removeNode(index)">
+        </Node>
+    </div>
+    <div class="higher-layer">
+        <SubWindow flexdown title="添加剧本节点" :states="windowState" name="node">
+            <WideButton @click="addNode('talk')">+ 普通对话框</WideButton>
+            <WideButton @click="addNode('select')">+ 对话选择框</WideButton>
+            <WideButton @click="addNode('image')">+ 显示图像（CG）</WideButton>
+            <WideButton @click="addNode('video')">+ 显示视频（过场动画）</WideButton>
+            <WideButton @click="addNode('script')">+ 脚本执行</WideButton>
+        </SubWindow>
+        <SubWindow title="角色管理" :states="windowState" name="character">
+            角色列表：<WideButton @click="addCharacter">+ 添加角色</WideButton>
+            <div class="options">
+                <div class="option" v-for="_, index in characters" :key="index">
+                    <input v-model="characters[index]" class="margin5 right" placeholder="角色名称...">
+                    <PrimaryButton @click="removeCharacter(index)">移除</PrimaryButton>
+                </div>
+                <span v-if="!characters.length">没有创建任何角色！</span>
             </div>
-            <div class="config-bar">
-                使用装饰器生成？
-                <CheckBox v-model="useDecorator" class="left-auto" />
-            </div>
-            <div class="config-bar">
-                添加组件
-                <WideButton class="left-auto" @click="addText">文本</WideButton>
-                <WideButton @click="addArg">参数框</WideButton>
-            </div>
-            <div class="config-bar">
-                积木ID：
-                <input style="margin-left: 10px;" v-model="blockOpcode" :disabled="disabledOpcode">
-                <WideButton @click="autoOpcode">自动计算</WideButton>
-            </div>
-            <div class="config-bar">
-                <WideButton class="left-auto" @click="saveBlock">保存</WideButton>
+            心情条目：<WideButton @click="addFeeling">+ 添加心情</WideButton>
+            <div class="options">
+                <div class="option" v-for="_, index in feelings" :key="index">
+                    <input v-model="feelings[index]" class="margin5 right" placeholder="心情名称...">
+                    <PrimaryButton @click="removeFeeling(index)">移除</PrimaryButton>
+                </div>
+                <span v-if="!feelings.length">没有创建任何心情！</span>
             </div>
         </SubWindow>
-        <SubWindow title="参数加载器" :states="windowState" name="loaders">
-            占位<br>
-            placeholder<br>
-            （还没做）<br>
+        <SubWindow title="脚本管理" :states="windowState" name="script">
+            <div class="options">
+                <div class="option" v-for="script, index in scripts" :key="index">
+                    <input v-model="scripts[index]" class="margin5 right" placeholder="脚本名称...">
+                    <PrimaryButton @click="removeScript(index)">移除</PrimaryButton>
+                </div>
+                <span v-if="!scripts.length">没有创建任何脚本！</span>
+            </div>
+            <WideButton @click="addScript">+ 添加脚本</WideButton>
+        </SubWindow>
+        <SubWindow title="资源管理" :states="windowState" name="asset">
+            <div class="options">
+                <div class="option" v-for="_, index in assetNames" :key="index">
+                    <img :src="assetDatas[index].dataUrl" class="margin5 right asset"
+                        v-if="assetDatas[index].type === 'image' && assetDatas[index].previewing" />
+                    <video :src="assetDatas[index].dataUrl" class="margin5 right asset"
+                        v-if="assetDatas[index].type === 'video' && assetDatas[index].previewing"></video>
+                    <span v-if="!assetDatas[index].data">（空资源）</span>
+                    <input v-model="assetNames[index]" class="margin5 right" placeholder="资源名称...">
+                    <Selector class="margin5 right" v-model="assetDatas[index].type" :options="{
+                        '图片': 'image',
+                        '视频': 'video'
+                    }" />
+                    <PrimaryButton class="margin5 right" @click="updateUpload(index)">上传资源</PrimaryButton>
+                    <PrimaryButton class="margin5 right"
+                        @click="assetDatas[index].previewing = !assetDatas[index].previewing">预览</PrimaryButton>
+                    <PrimaryButton @click="removeAsset(index)">移除</PrimaryButton>
+                </div>
+                <span v-if="!assetNames.length">没有上传任何资源！</span>
+            </div>
+            <WideButton @click="addAsset">+ 上传资源</WideButton>
         </SubWindow>
         <SubWindow title="项目" :states="windowState" name="project">
-            <div class="projs">
-                <WideButton @click="contextMenuState.project = true">
-                    文件
-                    <ContextMenu :show="contextMenuState.project" :items="[
-                        {
-                            name: '保存到本地',
-                            click() {
-                                save();
-                            },
-                            sub: [
-                                {
-                                    name: '多文件',
-                                    sub: [
-                                        {
-                                            name: '.json+资源 - 标准格式'
-                                        },
-                                        {
-                                            name: '.xml+.js - 数据+资源'
-                                        }
-                                    ]
-                                },
-                                {
-                                    name: '单文件',
-                                    sub: [
-                                        {
-                                            name: '.zip - 简单压缩包'
-                                        },
-                                        {
-                                            name: '.emp - ExtMaker标准格式',
-                                            sub:[
-                                                {
-                                                    name: '.emp - 不加密'
-                                                },
-                                                {
-                                                    name: '.empc - 加密'
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            name: '.fse - 更优雅的储存方式，需要FS-Context v2'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            name: '从本地加载',
-                            click() {
-                                console.log('打开')
-                            }
-                        },
-                        {
-                            name: '（实验）从项目服务器加载',
-                            click() {
-                                console.log('load from server')
-                            }
-                        }
-                    ]" />
-                </WideButton>
-                <span :class="{
-                    'tip': true,
-                    'error': serverState === 'error',
-                    'ok': serverState === 'ok',
-                    'loading': serverState === 'loading',
-                    'unknown': serverState === 'unknown'
-                }">{{ serverStateMap }}</span>
-                <WideButton :disabled="!canUseServer">打包：原版，无需编译</WideButton>
-                <WideButton :disabled="!canUseServer">打包：基于FS-Context框架</WideButton>
-            </div>
-        </SubWindow>
-        <SubWindow title="添加节点" :states="windowState" name="node">
-            <div class="projs">
-                <WideButton @click="addNormalNode">普通节点</WideButton>
-                <WideButton @click="addEntryNode">入口点</WideButton>
-            </div>
+            <input type="text" v-model="project.name" placeholder="项目名称" />
         </SubWindow>
         <SubWindow center title="关于" :states="windowState" name="about">
-            ExtMaker是一个可零基础使用的界面Scratch拓展设计器。<br>
+            ScriptEditor是一个基于界面的RPG/AVG游戏剧本设计器。<br>
             <div class="inline-left">
                 &lt;技术栈&gt; Vue3+Webpack<br>
                 &lt;开源许可&gt; MIT<br>
-                &lt;仓库&gt; <a href="https://github.com/Rundll86/ExtMakerGUI" target="_blank">Github</a>
+                &lt;仓库&gt; <a href="https://github.com/Rundll86/ScriptEditor" target="_blank">Github</a>
             </div><br>
             [[ 特别鸣谢 ]]<br>
-            <Member name="VHS" des="创意/策划" />
             <Member name="FallingShrimp" des="界面开发" />
-            <Member name="Cyberexplorer" des="美术支持" />
-            <Member name="叶睿杰" des="优化建议" />
         </SubWindow>
     </div>
 </template>
 <style scoped>
-.content {
-    background-color: white;
-    padding-top: 70px;
+.high-layer {
+    z-index: -1;
+    position: absolute;
+    left: 0;
+    top: 0;
+    transition: none;
 }
 
-.high-layer {
+.higher-layer {
     z-index: 10;
     position: absolute;
     left: 0;
@@ -209,256 +168,216 @@ a:hover,
 a:active {
     text-decoration: underline;
 }
+
+.options {
+    border: 2px solid gray;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+.options .option {
+    padding: 3px 6px;
+    display: flex;
+    align-items: center;
+}
+
+.options .option:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.options .remove-btn {
+    margin-left: auto;
+}
+
+.asset {
+    width: 70px;
+}
 </style>
-<script setup>
+<script setup lang="ts">
 import LeftBox from "./LeftBox.vue";
-import RightBox from "./RightBox.vue";
 import SubWindow from "./SubWindow.vue";
-import ArgumentPart from "./ArgumentPart.vue";
-import CheckBox from "./CheckBox.vue";
 import WideButton from "./WideButton.vue";
 import Member from "./Member.vue";
 import Stage from "./Stage.vue";
-import { toRaw } from "vue";
-import md5 from "md5";
 import { Drawing } from "../tools";
-import { Vector } from "../types/structs";
+import { NodeUpdater, ScriptNode, ScriptNodeNext, ScriptNodeType, Vector } from "../types/structs";
 import Node from "./Node.vue";
-import ContextMenu from "./ContextMenu.vue";
+import PrimaryButton from "./PrimaryButton.vue";
+import Selector from "./Selector.vue";
 </script>
-<script>
+<script lang="ts">
 export default {
     mounted() {
-        Drawing.initWith(this.$refs.stage.$el);
-        this.$nextTick(() => {
-            this.updateLines();
+        window.addEventListener("resize", this.updateLines);
+        (this.$refs.stage as any).$el.addEventListener("mousedown", (e: MouseEvent) => {
+            if (!window.dragging) {
+                e.preventDefault();
+                this.draggingHighLayer = true;
+            };
         });
-        fetch(this.buildServerHost() + "/ping")
-            .then(e => e.json())
-            .then(e => {
-                console.log(e);
-                if (this.isValidBuildServer(e)) {
-                    this.serverState = "ok"
-                } else {
-                    this.serverState = "unknown";
-                };
-            })
-            .catch(() => {
-                this.serverState = "error";
-            });
+        window.addEventListener("mouseup", e => {
+            this.draggingHighLayer = false;
+        });
+        window.addEventListener("mousemove", e => {
+            if (this.draggingHighLayer) {
+                this.highLayerPosition.x += e.movementX;
+                this.highLayerPosition.y += e.movementY;
+                this.updateLines();
+            };
+        });
     },
     computed: {
-        serverStateMap() {
-            return ({
-                loading: "正在" + this.serverStateSuffix,
-                ok: "已" + this.serverStateSuffix,
-                error: "无法" + this.serverStateSuffix,
-                unknown: "无法识别的项目服务器"
-            })[this.serverState];
-        },
-        canUseServer() {
-            return ["ok", "unknown"].includes(this.serverState);
-        },
         saveData() {
             return JSON.stringify({
-                blocks: this.blocks,
-                nodes: this.nodes,
-                currentBlock: this.currentBlock()
+                nodes: this.nodes
             });
         }
     },
     data() {
         return {
-            serverStateSuffix: "连接到项目服务器",
-            serverState: "loading", //loading, ok, error, unknown
-            blocks: [],
-            nodes: [],
-            updaters: [],
+            nodes: [] as ScriptNode[],
+            updaters: [] as NodeUpdater[],
+            characters: [
+                "abc",
+                "def",
+                "ghi"
+            ] as string[],
+            feelings: ["平静", "悲伤", "愤怒", "震惊", "恐惧", "喜悦"] as string[],
+            scripts: ["damageCurrent", "addHp", "addBullet"] as string[],
+            assetNames: [] as string[],
+            assetDatas: [] as {
+                data: ArrayBuffer | null,
+                type: string,
+                previewing: boolean,
+                get dataUrl(): string
+            }[],
             windowState: {
-                block: false,
-                menus: false,
-                loaders: false,
+                node: false,
+                character: false,
+                script: false,
+                asset: false,
                 project: false,
                 about: false,
                 activing: ""
             },
             contextMenuState: {
-                project: false,
+                project: false
             },
-            parts: [
-                {
-                    content: "弹窗",
-                    isText: true
-                },
-                {
-                    content: "something",
-                    isText: false,
-                    data: {
-                        inputType: "String",
-                        defaultValue: "一些东西",
-                        loader: null,
-                        menu: null
-                    }
-                },
-                {
-                    content: "到浏览器窗口",
-                    isText: true
-                }
-            ],
-            blockOpcode: "",
-            disabledOpcode: false,
-            useDecorator: false
+            project: {
+                name: "未命名项目"
+            },
+            highLayerPosition: new Vector(0, 0),
+            draggingHighLayer: false
         };
     },
     methods: {
         save() {
             console.log(this.saveData);
         },
-        isValidBuildServer(pingMessage) {
-            return (
-                pingMessage.is === "em-project-server"
-                && pingMessage.status === "running"
-                && pingMessage.message === "pong"
-            );
-        },
         updateLines() {
             Drawing.clear();
             this.updaters.forEach(updater => updater());
         },
-        findNode(name) {
-            const found = this.nodes.find(node => node.name === name);
+        findNode(name: string | null): ScriptNodeNext | null {
+            const found = this.nodes.find(node => node.name === name) ?? null;
             if (found) {
                 return {
                     data: this.nodes.find(node => node.name === name),
-                    el: document.getElementById("node-" + name)
+                    el: document.getElementById("node-" + name) as HTMLElement
                 };
             } else {
                 return null;
             };
-        },
-        addText() {
-            this.parts.push({
-                content: "new text",
-                isText: true
-            });
-        },
-        addArg() {
-            this.parts.push({
-                content: "argName",
-                isText: false,
-                data: {
-                    inputType: "string",
-                    defaultValue: "",
-                    loader: null,
-                    menu: null
-                }
-            });
-        },
-        autoOpcode() {
-            if (this.disabledOpcode) {
-                this.disabledOpcode = false;
-                this.blockOpcode = "";
-            } else {
-                this.disabledOpcode = true;
-                this.blockOpcode = "_" + md5(this.calcBlockTextWithoutArgInfo(this.parts));
-            };
-        },
-        saveBlock() {
-            const targetWrite = this.findBlock(this.blockOpcode);
-            const currentBlock = this.currentBlock();
-            if (targetWrite) {
-                targetWrite.parts = currentBlock.parts;
-                targetWrite.useDecorator = currentBlock.useDecorator;
-                targetWrite.text = currentBlock.text;
-            } else {
-                this.blocks.push(currentBlock);
-            };
-        },
-        calcBlockText(parts) {
-            return parts.map(part => {
-                if (part.isText) {
-                    return part.content;
-                } else {
-                    const inputType = part.data.inputType === "String" ? "" : `:${part.data.inputType.toLowerCase()}`;
-                    const defaultValue = part.data.defaultValue ? `=${part.data.defaultValue}` : "";
-                    return `[${part.content}${inputType}${defaultValue}]`;
-                };
-            }).join("");
-        },
-        calcBlockTextWithoutArgInfo(parts) {
-            return parts.map(part => {
-                if (part.isText) {
-                    return part.content;
-                } else {
-                    return `[${part.content}]`;
-                };
-            }).join("");
-        },
-        toRawBlockData(proxiedBlock) {
-            return {
-                opcode: toRaw(proxiedBlock.opcode),
-                parts: toRaw(proxiedBlock.parts),
-                useDecorator: toRaw(proxiedBlock.useDecorator),
-                text: proxiedBlock.text,
-                plainText: proxiedBlock.plainText
-            };
-        },
-        currentBlock() {
-            return this.toRawBlockData({
-                opcode: this.blockOpcode,
-                parts: this.parts,
-                useDecorator: this.useDecorator,
-                text: this.calcBlockText(this.parts),
-                plainText: this.calcBlockTextWithoutArgInfo(this.parts)
-            });
-        },
-        findBlock(opcode) {
-            return this.blocks.find(block => block.opcode === opcode) || null;
-        },
-        removePart(index) {
-            this.parts = this.parts.filter((_, i) => String(i) !== String(index));
-        },
-        buildServerHost() {
-            let url = window.location;
-            return url.protocol + "//" + url.hostname + ":" + 1145 + "/api"
-        },
-        async generatedCode() {
-            const response = await fetch(
-                this.buildServerHost(),
-                {
-                    method: "post",
-                    body: JSON.stringify({
-                        blocks: this.blocks
-                    }),
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
-                }
-            );
-            const generated = await response.text();
-            navigator.clipboard.writeText(generated);
-            alert("已复制")
         },
         generatedRandomNodeName() {
             let result = "node" + Math.floor(Math.random() * 1000000);
             while (this.findNode(result)) { result = "node" + Math.floor(Math.random() * 1000000); };
             return result;
         },
-        addNormalNode() {
+        addNode(type: ScriptNodeType) {
             this.nodes.push({
-                isEntry: false,
                 name: this.generatedRandomNodeName(),
+                type,
+                position: new Vector(-this.highLayerPosition.x + 50, -this.highLayerPosition.y + 60),
                 next: null,
-                position: new Vector(100, 100)
+                data: {
+                    options: []
+                }
+            })
+        },
+        addCharacter() {
+            this.characters.push("");
+        },
+        removeCharacter(index: number) {
+            this.characters.splice(index, 1);
+        },
+        addFeeling() {
+            this.feelings.push("");
+        },
+        removeFeeling(index: number) {
+            this.feelings.splice(index, 1);
+        },
+        removeNode(index: number) {
+            this.nodes.forEach(node => {
+                if (node.type === "select") {
+                    node.data.options.forEach(option => {
+                        if (option.next === this.nodes[index].name) {
+                            option.next = null;
+                        };
+                    });
+                } else {
+                    if (node.next === this.nodes[index].name) {
+                        node.next = null;
+                    };
+                };
+            });
+            this.nodes.splice(index, 1);
+            this.updaters.splice(index, 1);
+            this.updateLines();
+        },
+        addScript() {
+            this.scripts.push("");
+        },
+        removeScript(index: number) {
+            this.scripts.splice(index, 1);
+        },
+        async addAsset() {
+            this.assetDatas.push({
+                data: null,
+                type: "image",
+                previewing: false,
+                get dataUrl() {
+                    if (this.data) {
+                        return URL.createObjectURL(new Blob([this.data]));
+                    } else {
+                        return "";
+                    };
+                }
+            });
+            this.assetNames.push("");
+        },
+        removeAsset(index: number) {
+            this.assetNames.splice(index, 1);
+            this.assetDatas.splice(index, 1);
+        },
+        async uploadFile() {
+            return new Promise<ArrayBuffer>(resolve => {
+                const input = document.createElement("input");
+                input.type = "file";
+                input.addEventListener("change", () => {
+                    const file = input.files?.[0];
+                    const reader = new FileReader();
+                    reader.addEventListener("load", () => {
+                        resolve(reader.result as ArrayBuffer);
+                    });
+                    reader.readAsArrayBuffer(file as File);
+                });
+                input.click();
             });
         },
-        addEntryNode() {
-            this.nodes.push({
-                isEntry: true,
-                name: this.generatedRandomNodeName(),
-                next: null,
-                position: new Vector(100, 100)
-            });
+        async updateUpload(index: number) {
+            this.assetDatas[index].data = await this.uploadFile();
         }
     }
 }

@@ -2,14 +2,15 @@
     <Draggable ref="root" :class="{
         container: true,
         activing: states.activing === name
-    }" @dragstart="states.activing = name" v-if="states?.[name] || false">
+    }" @dragstart="states.activing = name" v-if="states?.[name] || false" :x="50" :y="60">
         <div class="title-bar" data-region>
-            <span class="title" data-region>{{ title }}</span>
-            <ToolBoxButton class="close-button" @click="close">◀</ToolBoxButton>
+            <span class="title">{{ title }}</span>
+            <ToolBoxButton class="close-button" @click="close" data-no-region>◀</ToolBoxButton>
         </div>
         <div :class="{
             content: true,
-            center
+            center,
+            flexdown
         }">
             <slot></slot>
         </div>
@@ -48,6 +49,11 @@
     text-align: center;
 }
 
+.content.flexdown {
+    display: flex;
+    flex-direction: column;
+}
+
 .close-button {
     margin-left: auto;
 }
@@ -62,7 +68,8 @@ export default {
         title: String,
         states: Object,
         name: String,
-        center: Boolean
+        center: Boolean,
+        flexdown: Boolean
     },
     methods: {
         close() {

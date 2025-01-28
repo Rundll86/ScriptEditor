@@ -10,6 +10,7 @@
     outline: none;
     font-size: 16px;
     -webkit-user-drag: none;
+    transition: all 0.2s ease-out;
 }
 
 body {
@@ -17,10 +18,28 @@ body {
 }
 
 input {
-    border: 2px solid gray;
-    border-radius: 5px;
+    border-bottom: 2px solid gray;
     padding: 3px 5px;
-    width: 100px;
+    width: 150px;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+input.wide {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.margin5.right {
+    margin-right: 5px;
+}
+
+.margin5.left {
+    margin-left: 5px;
+}
+
+input:hover,
+input:focus {
+    background-color: rgba(0, 0, 0, 0.1);
 }
 
 span.label {

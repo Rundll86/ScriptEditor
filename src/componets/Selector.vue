@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+    <div class="container" :class="{ wide }">
         <div :class="{
             show: true,
             open: opening
@@ -13,10 +13,7 @@
             </ToolBoxButton>
             <input type="text" class="searcher" v-model="searchText" v-if="searching">
         </div>
-        <div :class="{
-            options: true,
-            open: opening
-        }">
+        <div class="options" v-if="opening">
             <div v-for="option in Object.keys(options)" :key="option">
                 <div class="option" v-if="option.includes(searchText)" :key="option" @click="select(options[option])">
                     <span :class="{
@@ -30,15 +27,15 @@
         </div>
     </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import ToolBoxButton from "./ToolBoxButton.vue";
 </script>
-<script>
+<script lang="ts">
 export default {
     props: {
         options: {
             type: Object,
-            default: () => ({ option1: "a", option2: "b" })
+            default: () => ({ option1: "a", option2: "b", option3: "c" })
         },
         modelValue: {
             type: String,
@@ -47,6 +44,10 @@ export default {
         option: {
             type: String,
             default: ""
+        },
+        wide: {
+            type: Boolean,
+            default: false
         }
     },
     data() {
@@ -61,7 +62,7 @@ export default {
         };
     },
     methods: {
-        select(option) {
+        select(option: any) {
             this.selected = option;
             this.opening = false;
         }
@@ -87,6 +88,10 @@ export default {
     position: relative;
 }
 
+.container.wide {
+    width: 100%;
+}
+
 .option {
     padding: 0 10px;
     text-align: center;
@@ -94,17 +99,13 @@ export default {
 
 .options {
     overflow: auto;
-    height: 0;
-}
-
-.options.open {
-    height: auto;
-    max-height: 50vh;
+    max-height: 40vh;
 }
 
 .title {
     text-align: center;
     flex-grow: 1;
+    margin: 0 5px;
 }
 
 .show {

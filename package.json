@@ -1,5 +1,5 @@
 {
-  "name": "ext-maker-gui",
+  "name": "script-editor",
   "scripts": {
     "dev": "webpack serve --mode development",
     "dist": "webpack --mode production",
