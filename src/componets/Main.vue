@@ -26,7 +26,7 @@
             <div class="options">
                 <div class="option" v-for="_, index in characters" :key="index">
                     <input v-model="characters[index]" class="margin5 right" placeholder="角色名称...">
-                    <PrimaryButton @click="removeCharacter(index)">移除</PrimaryButton>
+                    <PrimaryButton class="margin-auto left" @click="removeCharacter(index)">移除</PrimaryButton>
                 </div>
                 <span v-if="!characters.length">没有创建任何角色！</span>
             </div>
@@ -35,7 +35,7 @@
                 <div class="option" v-for="_, index in feelings" :key="index">
                     <input v-model="feelings[index]" class="margin5 right" placeholder="心情名称...">
                     <input v-model="feelingMaps[index]" class="margin5 right" placeholder="对应映射ID...">
-                    <PrimaryButton @click="removeFeeling(index)">移除</PrimaryButton>
+                    <PrimaryButton class="margin-auto left" @click="removeFeeling(index)">移除</PrimaryButton>
                 </div>
                 <span v-if="!feelings.length">没有创建任何心情！</span>
             </div>

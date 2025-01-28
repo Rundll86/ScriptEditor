@@ -37,6 +37,10 @@ input.wide {
     margin-left: 5px;
 }
 
+.margin-auto.left {
+    margin-left: auto;
+}
+
 input:hover,
 input:focus {
     background-color: rgba(0, 0, 0, 0.1);

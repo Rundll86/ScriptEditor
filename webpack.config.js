@@ -73,7 +73,7 @@ module.exports = {
     devServer: {
         static: "public",
         compress: true,
-        port: 19198,
+        port: 8080,
         client: {
             logging: "none"
         }
