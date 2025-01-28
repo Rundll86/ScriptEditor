@@ -1,23 +1,34 @@
 <template>
     <div class="root">
-        <img :src="`./img/${name}.jpg`" class="avatar">
+        <img :src="`./img/${name}.jpg`" :class="{
+            avatar: true,
+            border: circle
+        }">
         <span class="name">{{ name }}</span>
-        <span class="des">{{ des }}</span>
+        <a :href="website" target="_blank" class="alias smallfont">
+            {{ alias }}
+            {{ website ? "[↗]" : ""}}
+        </a>
     </div>
 </template>
-<script>
-export default {
+<script setup lang="ts">
+import { defineComponent } from 'vue';
+</script>
+<script lang="ts">
+export default defineComponent({
     props: {
         name: {
             type: String,
             default: "UnknownMember"
         },
-        des: {
+        alias: {
             type: String,
-            default: "Description"
-        }
+            default: "MemberAlias"
+        },
+        website: String,
+        circle: Boolean
     }
-}
+});
 </script>
 <style scoped>
 .avatar {
@@ -26,14 +37,34 @@ export default {
     border-radius: 50%;
 }
 
+.avatar.border {
+    border: 2px solid gray;
+}
+
+.smallfont {
+    font-size: 14px;
+}
+
 .name {
     font-weight: bold;
     font-size: 18px;
     margin-top: 5px;
 }
 
-.des {
+.alias {
     margin-top: 5px;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+a:link,
+a:visited {
+    text-decoration: none;
+}
+
+a:hover,
+a:active {
+    color: rgba(0, 0, 0, 0.75);
+    text-decoration: underline;
 }
 
 .root {

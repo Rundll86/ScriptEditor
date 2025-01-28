@@ -1,6 +1,6 @@
 <template>
     <div class="bg">
-        <span class="logo">ExtMaker GUI</span>
+        <span class="logo">ScriptEditor GUI</span>
     </div>
 </template>
 <style scoped>

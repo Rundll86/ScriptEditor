@@ -35,6 +35,7 @@
             <div class="options">
                 <div class="option" v-for="_, index in feelings" :key="index">
                     <input v-model="feelings[index]" class="margin5 right" placeholder="心情名称...">
+                    <input v-model="feelingMaps[index]" class="margin5 right" placeholder="对应映射ID...">
                     <PrimaryButton @click="removeFeeling(index)">移除</PrimaryButton>
                 </div>
                 <span v-if="!feelings.length">没有创建任何心情！</span>
@@ -42,7 +43,7 @@
         </SubWindow>
         <SubWindow title="脚本管理" :states="windowState" name="script">
             <div class="options">
-                <div class="option" v-for="script, index in scripts" :key="index">
+                <div class="option" v-for="_, index in scripts" :key="index">
                     <input v-model="scripts[index]" class="margin5 right" placeholder="脚本名称...">
                     <PrimaryButton @click="removeScript(index)">移除</PrimaryButton>
                 </div>
@@ -72,8 +73,23 @@
             </div>
             <WideButton @click="addAsset">+ 上传资源</WideButton>
         </SubWindow>
-        <SubWindow title="项目" :states="windowState" name="project">
-            <input type="text" v-model="project.name" placeholder="项目名称" />
+        <SubWindow flexdown title="项目" :states="windowState" name="project">
+            <input class="wide" type="text" v-model="project.name" placeholder="项目名称" />
+            项目中的无效内容：
+            <div class="options">
+                <div v-for="content, index in Object.keys(invalidContents)" :key="index">
+                    <span>{{ jargon(content) }}：</span>
+                    <div class="options">
+                        <div v-for="asset in invalidContents[content]" class="option">
+                            {{ content === "assets" ? "空资源×1" : asset || "无效或空名称×1" }}
+                        </div>
+                        <span v-if="!invalidContents[content].length">（无）</span>
+                    </div>
+                </div>
+            </div>
+            无效资源不会被打包，请先处理无效资源。<br>
+            <WideButton>保存项目</WideButton>
+            <WideButton>从电脑加载项目</WideButton>
         </SubWindow>
         <SubWindow center title="关于" :states="windowState" name="about">
             ScriptEditor是一个基于界面的RPG/AVG游戏剧本设计器。<br>
@@ -83,7 +99,9 @@
                 &lt;仓库&gt; <a href="https://github.com/Rundll86/ScriptEditor" target="_blank">Github</a>
             </div><br>
             [[ 特别鸣谢 ]]<br>
-            <Member name="FallingShrimp" des="界面开发" />
+            <Member name="FallingShrimp" alias="陨落基围虾" website="https://rundll86.github.io" />
+            <Member name="Cyberexplorer" alias="赛博猫猫" website="https://lanwywritexu.github.io" />
+            <Member circle name="SolariiX" alias="为每块屏幕创造精彩" website="https://solariix.com" />
         </SubWindow>
     </div>
 </template>
@@ -174,6 +192,8 @@ a:active {
     padding: 5px;
     display: flex;
     flex-direction: column;
+    overflow: auto;
+    max-height: 40vh;
 }
 
 .options .option {
@@ -232,18 +252,49 @@ export default {
             return JSON.stringify({
                 nodes: this.nodes
             });
+        },
+        invalidContents(): Record<"nodes" | "characters" | "feelings" | "scripts" | "assets", string[]> & { [key: string]: string[] } {
+            const result = {
+                nodes: [] as string[],
+                characters: [] as string[],
+                feelings: [] as string[],
+                scripts: [] as string[],
+                assets: [] as string[]
+            };
+            this.nodes.forEach(node => {
+                if (node.name === "") {
+                    result.nodes.push(node.name);
+                };
+            });
+            this.characters.forEach(character => {
+                if (!character.length) {
+                    result.characters.push(character);
+                };
+            });
+            this.feelings.forEach(feeling => {
+                if (!feeling.length) {
+                    result.feelings.push(feeling);
+                };
+            });
+            this.scripts.forEach(script => {
+                if (!script.length) {
+                    result.scripts.push(script);
+                };
+            });
+            this.assetNames.forEach((asset, index) => {
+                if (!asset.length || !this.assetDatas[index].data) {
+                    result.assets.push(asset);
+                };
+            });
+            return result;
         }
     },
     data() {
         return {
             nodes: [] as ScriptNode[],
-            updaters: [] as NodeUpdater[],
-            characters: [
-                "abc",
-                "def",
-                "ghi"
-            ] as string[],
+            characters: [] as string[],
             feelings: ["平静", "悲伤", "愤怒", "震惊", "恐惧", "喜悦"] as string[],
+            feelingMaps: ["normal", "sad", "angry", "shocked", "afraid", "happy"] as string[],
             scripts: ["damageCurrent", "addHp", "addBullet"] as string[],
             assetNames: [] as string[],
             assetDatas: [] as {
@@ -252,6 +303,7 @@ export default {
                 previewing: boolean,
                 get dataUrl(): string
             }[],
+            updaters: [] as NodeUpdater[],
             windowState: {
                 node: false,
                 character: false,
@@ -299,7 +351,7 @@ export default {
             this.nodes.push({
                 name: this.generatedRandomNodeName(),
                 type,
-                position: new Vector(-this.highLayerPosition.x + 50, -this.highLayerPosition.y + 60),
+                position: new Vector(-this.highLayerPosition.x + window.innerWidth / 2, -this.highLayerPosition.y + window.innerHeight / 2),
                 next: null,
                 data: {
                     options: []
@@ -313,10 +365,12 @@ export default {
             this.characters.splice(index, 1);
         },
         addFeeling() {
+            this.feelingMaps.push("");
             this.feelings.push("");
         },
         removeFeeling(index: number) {
             this.feelings.splice(index, 1);
+            this.feelingMaps.splice(index, 1);
         },
         removeNode(index: number) {
             this.nodes.forEach(node => {
@@ -378,6 +432,20 @@ export default {
         },
         async updateUpload(index: number) {
             this.assetDatas[index].data = await this.uploadFile();
+        },
+        jargon(key: string) {
+            const map: Record<string, string> = {
+                node: "节点",
+                character: "角色",
+                feeling: "心情",
+                script: "脚本",
+                asset: "资源"
+            };
+            const mapWithS: Record<string, string> = {};
+            Object.keys(map).forEach(key => {
+                mapWithS[key + "s"] = map[key];
+            });
+            return map[key] ?? mapWithS[key] ?? key;
         }
     }
 }
