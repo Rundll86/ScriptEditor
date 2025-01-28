@@ -69,7 +69,7 @@ export function calcControl(
 export function keyMirror(...keys: (string | string[])[]) {
     const result: any = {};
     keys.forEach(key => {
-        if (typeof key === 'string') {
+        if (typeof key === "string") {
             result[key] = key;
         } else {
             key.forEach(key => {

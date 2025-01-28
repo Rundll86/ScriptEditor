@@ -260,6 +260,7 @@ export default {
             if (this.myNext) {
                 return this.myNext.el.querySelector(".in.point") as HTMLElement;
             };
+            return null;
         },
         myLabelType() {
             const map: Record<ScriptNodeType, string> = {

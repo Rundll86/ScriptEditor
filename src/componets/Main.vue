@@ -79,7 +79,7 @@
                 <div v-for="content, index in Object.keys(invalidContents)" :key="index">
                     <span>{{ jargon(content) }}：</span>
                     <div class="options">
-                        <div v-for="asset in invalidContents[content]" class="option">
+                        <div v-for="asset in invalidContents[content]" class="option"  :key="asset">
                             {{ content === "assets" ? "空资源×1" : asset || "无效或空名称×1" }}
                         </div>
                         <span v-if="!invalidContents[content].length">（无）</span>
@@ -247,7 +247,7 @@ export default {
                 this.draggingHighLayer = true;
             };
         });
-        window.addEventListener("mouseup", e => {
+        window.addEventListener("mouseup", () => {
             this.draggingHighLayer = false;
         });
         window.addEventListener("mousemove", e => {
@@ -537,7 +537,7 @@ export default {
             return map[key] ?? mapWithS[key] ?? key;
         },
         arrayBufferToBase64(buffer: ArrayBuffer) {
-            let binary = '';
+            let binary = "";
             const bytes = new Uint8Array(buffer);
             const len = bytes.byteLength;
             for (let i = 0; i < len; i++) {

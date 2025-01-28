@@ -31,7 +31,7 @@
 }
 </style>
 <script setup>
-import { defineComponent } from 'vue';
+import { defineComponent } from "vue";
 </script>
 <script>
 export default defineComponent({
