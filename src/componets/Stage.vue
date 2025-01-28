@@ -10,6 +10,10 @@ canvas {
     height: 100vh;
     z-index: -1;
 }
+
+canvas:hover {
+    cursor: move;
+}
 </style>
 <script setup>
 import { Drawing } from "../tools";

@@ -1,5 +1,8 @@
 <template>
-    <button class="btn">
+    <button :class="{
+        btn: true,
+        superwide
+    }">
         <slot></slot>
     </button>
 </template>
@@ -12,6 +15,12 @@
     border: 1px solid gray;
 }
 
+.btn.superwide {
+    width: 100%;
+    margin: 0;
+    margin: 3px 0;
+}
+
 .btn:hover {
     background-color: rgba(0, 0, 0, 0.2);
 }
@@ -21,3 +30,13 @@
     color: gray;
 }
 </style>
+<script setup>
+import { defineComponent } from 'vue';
+</script>
+<script>
+export default defineComponent({
+    props: {
+        superwide: Boolean
+    }
+})
+</script>

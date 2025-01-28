@@ -9,7 +9,7 @@ export function declareGlobalVaribles(obj: { [key: string]: any }) {
 export function bezierCurve(t: number, a: Vector, control1: Vector, control2: Vector, b: Vector): Vector {
     const x = (1 - t) ** 3 * a.x + 3 * (1 - t) ** 2 * t * control1.x + 3 * (1 - t) * t ** 2 * control2.x + t ** 3 * b.x;
     const y = (1 - t) ** 3 * a.y + 3 * (1 - t) ** 2 * t * control1.y + 3 * (1 - t) * t ** 2 * control2.y + t ** 3 * b.y;
-    return { x, y };
+    return new Vector(x, y);
 };
 export function circleEquation(p: Vector, circleCenter: Vector, radius: number): boolean {
     return (p.x - circleCenter.x) ** 2 + (p.y - circleCenter.y) ** 2 <= radius ** 2;
@@ -76,6 +76,13 @@ export function keyMirror(...keys: (string | string[])[]) {
                 result[key] = key;
             });
         };
+    });
+    return result;
+};
+export function keyMapper(keys: string[], values: string[]) {
+    const result: any = {};
+    keys.forEach((key, index) => {
+        result[key] = values[index];
     });
     return result;
 };

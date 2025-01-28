@@ -65,10 +65,6 @@ export default {
         select(option: any) {
             this.selected = option;
             this.opening = false;
-        }
-    },
-    watch: {
-        selected() {
             this.$emit("update:modelValue", this.selected);
             this.$emit("update:option", this.optionName);
         }
@@ -86,6 +82,7 @@ export default {
     vertical-align: top;
     border: 1px solid gray;
     position: relative;
+    box-sizing: border-box;
 }
 
 .container.wide {

@@ -11,8 +11,7 @@
             v-model:x="node.position.x" v-model:y="node.position.y"
             :updaterRegister="(func: NodeUpdater) => updaters.push(func)" @change="updateLines"
             :forceUpdater="updateLines" :characters="characters" :feelings="feelings" :scripts="scripts"
-            @remove="removeNode(index)">
-        </Node>
+            :assetNames="assetNames" :assetDatas="assetDatas" @remove="removeNode(index)" @clone="cloneNode(index)" />
     </div>
     <div class="higher-layer">
         <SubWindow flexdown title="添加剧本节点" :states="windowState" name="node">
@@ -88,8 +87,14 @@
                 </div>
             </div>
             无效资源不会被打包，请先处理无效资源。<br>
-            <WideButton>保存项目</WideButton>
-            <WideButton>从电脑加载项目</WideButton>
+            <div style="text-align: center">
+                <WideButton @click="downloadFile(JSON.stringify(projectData[targetSaver]), `${targetSaver}.json`)">独立编译
+                </WideButton>
+                <Selector v-model="targetSaver" style="vertical-align: revert;"
+                    :options="keyMapper(Object.keys(invalidContents).map(e => jargon(e) + '数据'), Object.keys(invalidContents))" />
+            </div>
+            <WideButton @click="downloadFile(JSON.stringify(projectData), 'project.json')">保存整个项目</WideButton>
+            <WideButton @click="loadProject">从电脑加载项目</WideButton>
         </SubWindow>
         <SubWindow center title="关于" :states="windowState" name="about">
             ScriptEditor是一个基于界面的RPG/AVG游戏剧本设计器。<br>
@@ -194,6 +199,7 @@ a:active {
     flex-direction: column;
     overflow: auto;
     max-height: 40vh;
+    min-height: 15vh;
 }
 
 .options .option {
@@ -220,13 +226,18 @@ import SubWindow from "./SubWindow.vue";
 import WideButton from "./WideButton.vue";
 import Member from "./Member.vue";
 import Stage from "./Stage.vue";
-import { Drawing } from "../tools";
-import { NodeUpdater, ScriptNode, ScriptNodeNext, ScriptNodeType, Vector } from "../types/structs";
+import { Drawing, keyMapper } from "../tools";
+import { AssetDescriptor, NodeUpdater, ScriptAssetGenerated, ScriptNode, ScriptNodeGenerated, ScriptNodeNext, ScriptNodeType, SelectOption, Vector } from "../types/structs";
 import Node from "./Node.vue";
 import PrimaryButton from "./PrimaryButton.vue";
 import Selector from "./Selector.vue";
 </script>
 <script lang="ts">
+type AcceptType = {
+    dataurl: string,
+    arraybuffer: ArrayBuffer,
+    text: string
+}
 export default {
     mounted() {
         window.addEventListener("resize", this.updateLines);
@@ -287,6 +298,49 @@ export default {
                 };
             });
             return result;
+        },
+        projectData() {
+            const result: Record<"nodes" | "characters" | "feelings" | "scripts" | "assets", any> & { [key: string]: any } = {
+                nodes: {} as Record<string, ScriptNodeGenerated>,
+                characters: [...this.characters],
+                feelings: {} as Record<string, string>,
+                scripts: [...this.scripts],
+                assets: {} as Record<string, ScriptAssetGenerated>
+            };
+            this.nodes.forEach(node => {
+                const current: ScriptNodeGenerated = {
+                    type: node.type,
+                    jumpTo: node.next,
+                    position: node.position
+                };
+                if (node.type === "talk" || node.type === "select") {
+                    current.output = node.data.talker;
+                    current.emoji = node.data.feeling;
+                    current.content = node.data.content;
+                } else if (node.type === "image" || node.type === "video") {
+                    current.src = node.data.src;
+                } else if (node.type === "script") {
+                    current.scriptId = node.data.scriptId;
+                };
+                if (node.type === "select") {
+                    current.options = node.data.options.map(e => ({
+                        label: e.label,
+                        jumpTo: e.next ?? "#"
+                    }));
+                };
+                result.nodes[node.name] = current;
+            });
+            this.feelings.forEach((feeling, index) => {
+                result.feelings[feeling] = this.feelingMaps[index];
+            });
+            this.assetNames.forEach((asset, index) => {
+                if (!this.assetDatas[index].data) return;
+                result.assets[asset] = {
+                    data: this.arrayBufferToBase64(this.assetDatas[index].data),
+                    type: this.assetDatas[index].type
+                };
+            });
+            return result;
         }
     },
     data() {
@@ -297,12 +351,7 @@ export default {
             feelingMaps: ["normal", "sad", "angry", "shocked", "afraid", "happy"] as string[],
             scripts: ["damageCurrent", "addHp", "addBullet"] as string[],
             assetNames: [] as string[],
-            assetDatas: [] as {
-                data: ArrayBuffer | null,
-                type: string,
-                previewing: boolean,
-                get dataUrl(): string
-            }[],
+            assetDatas: [] as AssetDescriptor[],
             updaters: [] as NodeUpdater[],
             windowState: {
                 node: false,
@@ -320,7 +369,8 @@ export default {
                 name: "未命名项目"
             },
             highLayerPosition: new Vector(0, 0),
-            draggingHighLayer: false
+            draggingHighLayer: false,
+            targetSaver: ""
         };
     },
     methods: {
@@ -351,7 +401,10 @@ export default {
             this.nodes.push({
                 name: this.generatedRandomNodeName(),
                 type,
-                position: new Vector(-this.highLayerPosition.x + window.innerWidth / 2, -this.highLayerPosition.y + window.innerHeight / 2),
+                position: new Vector(
+                    -this.highLayerPosition.x + Math.floor(window.innerWidth / 2 * Math.random()),
+                    -this.highLayerPosition.y + Math.floor(window.innerHeight / 2 * Math.random())
+                ),
                 next: null,
                 data: {
                     options: []
@@ -390,6 +443,19 @@ export default {
             this.updaters.splice(index, 1);
             this.updateLines();
         },
+        cloneNode(index: number) {
+            const node = this.nodes[index];
+            this.addNode(node.type);
+            const newNode = this.nodes[this.nodes.length - 1];
+            newNode.position = node.position.translated(new Vector(350, 0));
+            newNode.data = JSON.parse(JSON.stringify(node.data));
+            if (!node.next && node.type !== "select") {
+                this.$nextTick(() => {
+                    node.next = newNode.name;
+                    this.updateLines();
+                });
+            };
+        },
         addScript() {
             this.scripts.push("");
         },
@@ -415,23 +481,46 @@ export default {
             this.assetNames.splice(index, 1);
             this.assetDatas.splice(index, 1);
         },
-        async uploadFile() {
-            return new Promise<ArrayBuffer>(resolve => {
+        async readFile<T extends keyof AcceptType>(file: File, target: T = "arraybuffer" as T): Promise<AcceptType[T]> {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.addEventListener("load", () => {
+                    if (reader.result) resolve(reader.result as AcceptType[T]);
+                    else reject(null);
+                });
+                reader.addEventListener("error", () => {
+                    reject(null);
+                });
+                if (target === "dataurl") {
+                    reader.readAsDataURL(file);
+                } else if (target === "arraybuffer") {
+                    reader.readAsArrayBuffer(file);
+                } else if (target === "text") {
+                    reader.readAsText(file);
+                };
+            });
+        },
+        async uploadFile<T extends keyof AcceptType>(target: T = "arraybuffer" as T) {
+            return new Promise<AcceptType[T]>(resolve => {
                 const input = document.createElement("input");
                 input.type = "file";
-                input.addEventListener("change", () => {
+                input.addEventListener("change", async () => {
                     const file = input.files?.[0];
-                    const reader = new FileReader();
-                    reader.addEventListener("load", () => {
-                        resolve(reader.result as ArrayBuffer);
-                    });
-                    reader.readAsArrayBuffer(file as File);
+                    if (file) {
+                        resolve(await this.readFile(file, target));
+                    };
                 });
                 input.click();
             });
         },
+        downloadFile(content: any, filename: string = "something") {
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(new Blob([content]));
+            a.download = filename;
+            a.click();
+        },
         async updateUpload(index: number) {
-            this.assetDatas[index].data = await this.uploadFile();
+            this.assetDatas[index].data = await this.uploadFile("arraybuffer");
         },
         jargon(key: string) {
             const map: Record<string, string> = {
@@ -446,6 +535,92 @@ export default {
                 mapWithS[key + "s"] = map[key];
             });
             return map[key] ?? mapWithS[key] ?? key;
+        },
+        arrayBufferToBase64(buffer: ArrayBuffer) {
+            let binary = '';
+            const bytes = new Uint8Array(buffer);
+            const len = bytes.byteLength;
+            for (let i = 0; i < len; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            };
+            return btoa(binary);
+        },
+        base64ToArrayBuffer(base64: string) {
+            const binaryString = window.atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        },
+        async loadProject() {
+            this.reconstructOriginalData(JSON.parse(await this.uploadFile("text")));
+            this.$nextTick(() => this.updateLines());
+        },
+        reconstructOriginalData(projectData: typeof this.projectData) {
+            const originalData = {
+                nodes: [] as ScriptNode[],
+                characters: [] as string[],
+                feelings: [] as string[],
+                feelingMaps: [] as string[],
+                scripts: [] as string[],
+                assetNames: [] as string[],
+                assetDatas: [] as AssetDescriptor[]
+            };
+            for (const nodeName in projectData.nodes) {
+                const node = projectData.nodes[nodeName];
+                const originalNode: ScriptNode = {
+                    name: nodeName,
+                    next: node.jumpTo || null,
+                    position: node.position,
+                    type: node.type,
+                    data: {
+                        options: node.options?.map((e: SelectOption) => ({
+                            label: e.label,
+                            next: e.jumpTo
+                        })) ?? []
+                    }
+                };
+                if (node.type === "talk" || node.type === "select") {
+                    originalNode.data.talker = node.output;
+                    originalNode.data.feeling = node.emoji;
+                    originalNode.data.content = node.content;
+                } else if (node.type === "image" || node.type === "video") {
+                    originalNode.data.src = node.src;
+                } else if (node.type === "script") {
+                    originalNode.data.scriptId = node.scriptId;
+                };
+                originalData.nodes.push(originalNode);
+            };
+            originalData.characters = projectData.characters;
+            originalData.feelings = Object.keys(projectData.feelings);
+            originalData.feelingMaps = Object.values(projectData.feelings);
+            originalData.scripts = projectData.scripts;
+            for (const assetName in projectData.assets) {
+                const asset = projectData.assets[assetName];
+                originalData.assetNames.push(assetName);
+                originalData.assetDatas.push({
+                    data: this.base64ToArrayBuffer(asset.data),
+                    type: asset.type,
+                    previewing: false,
+                    get dataUrl() {
+                        if (this.data) {
+                            return URL.createObjectURL(new Blob([this.data]));
+                        } else {
+                            return "";
+                        };
+                    }
+                });
+            };
+            this.updaters = [];
+            this.nodes = originalData.nodes;
+            this.characters = originalData.characters;
+            this.feelings = originalData.feelings;
+            this.feelingMaps = originalData.feelingMaps;
+            this.scripts = originalData.scripts;
+            this.assetNames = originalData.assetNames;
+            this.assetDatas = originalData.assetDatas;
         }
     }
 }

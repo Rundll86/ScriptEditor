@@ -43,6 +43,8 @@
 
 .content {
     padding: 15px;
+    max-height: 50vh;
+    overflow: auto;
 }
 
 .content.center {

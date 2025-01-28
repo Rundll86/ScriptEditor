@@ -4,7 +4,8 @@
             <div class="title-bar" data-region :data-node="node.name">
                 <div ref="in" class="in point"></div>
                 <span class="margin5 right">{{ myLabelType }}</span>
-                <PrimaryButton @click="removeSelf" class="remove-btn" data-no-region>移除</PrimaryButton>
+                <PrimaryButton @click="$emit('remove')" class="remove-btn" data-no-region>移除</PrimaryButton>
+                <PrimaryButton @click="$emit('clone')" class="clone-btn" data-no-region>克隆</PrimaryButton>
             </div>
             <div class="content">
                 <div v-if="node.type === 'talk'">
@@ -35,9 +36,21 @@
                     </div>
                 </div>
                 <div v-if="node.type === 'image'">
-                    <img :src="'/assets/' + node.data.src">
+                    <img v-if="node.data.src && previewing"
+                        :src="assetDatas[assetNames.indexOf(node.data.src)].dataUrl"><br>
+                    <Selector wide v-model="node.data.src"
+                        :options="keyMirror(assetNames.filter(name => assetDatas[assetNames.indexOf(name)].type === 'image'))" />
+                    <br>
+                    <WideButton superwide @click="previewing = !previewing">预览：{{ previewing ? '开' : '关' }}</WideButton>
                 </div>
-                <div v-if="node.type === 'video'"></div>
+                <div v-if="node.type === 'video'">
+                    <video v-if="node.data.src && previewing"
+                        :src="assetDatas[assetNames.indexOf(node.data.src)].dataUrl" controls></video><br>
+                    <Selector wide v-model="node.data.src"
+                        :options="keyMirror(assetNames.filter(name => assetDatas[assetNames.indexOf(name)].type === 'video'))" />
+                    <br>
+                    <WideButton superwide @click="previewing = !previewing">预览:{{ previewing ? '开' : '关' }}</WideButton>
+                </div>
                 <div v-if="node.type === 'script'">
                     脚本ID：
                     <Selector v-model="node.data.scriptId" :options="keyMirror(scripts)" />
@@ -126,14 +139,19 @@
 .remove-btn {
     margin-left: auto;
 }
+
+.clone-btn {
+    margin-left: 5px;
+}
 </style>
 <script setup lang="ts">
 import Draggable from "./Draggable.vue";
 import { Drawing, keyMirror } from "../tools";
 import Selector from "./Selector.vue";
-import { ScriptNode, ScriptNodeNext, ScriptNodeType } from "src/types/structs";
+import { AssetDescriptor, ScriptNode, ScriptNodeNext, ScriptNodeType } from "src/types/structs";
 import PrimaryButton from "./PrimaryButton.vue";
 import { PropType } from "vue";
+import WideButton from "./WideButton.vue";
 </script>
 <script lang="ts">
 export default {
@@ -164,6 +182,14 @@ export default {
         },
         scripts: {
             type: Array<string>,
+            required: true
+        },
+        assetNames: {
+            type: Array as PropType<string[]>,
+            required: true
+        },
+        assetDatas: {
+            type: Object as PropType<AssetDescriptor[]>,
             required: true
         }
     },
@@ -225,7 +251,8 @@ export default {
     data() {
         return {
             amIConnecting: false,
-            connectingLabelIndex: -1
+            connectingLabelIndex: -1,
+            previewing: false
         }
     },
     computed: {
@@ -292,9 +319,6 @@ export default {
         },
         removeOption(index: number) {
             this.node.data.options.splice(index, 1);
-        },
-        removeSelf() {
-            this.$emit("remove");
         },
         findNodeDataName(ele: HTMLElement): string | null {
             const result = ele.dataset.node;

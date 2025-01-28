@@ -5,6 +5,15 @@ export class Vector {
         this.x = x;
         this.y = y;
     };
+    clone() {
+        return new Vector(this.x, this.y);
+    };
+    translated(offset: Vector) {
+        const newVector = this.clone();
+        newVector.x += offset.x;
+        newVector.y += offset.y;
+        return newVector;
+    };
 };
 export type ScriptNodeType = "talk" | "select" | "image" | "video" | "script";
 export interface ScriptNode {
@@ -35,3 +44,28 @@ export interface ScriptNodeNext {
     data?: ScriptNode;
     el: HTMLElement
 };
+export interface SelectOption {
+    label: string;
+    jumpTo: string;
+};
+export interface ScriptNodeGenerated {
+    type: ScriptNodeType;
+    jumpTo: string | null;
+    position: Vector;
+    output?: string;
+    emoji?: string;
+    content?: string;
+    options?: SelectOption[];
+    src?: string;
+    scriptId?: string;
+};
+export interface AssetDescriptor {
+    data: ArrayBuffer | null;
+    type: string;
+    previewing: boolean;
+    get dataUrl(): string;
+};
+export interface ScriptAssetGenerated {
+    data: string;
+    type: string;
+}
