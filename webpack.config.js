@@ -45,6 +45,15 @@ module.exports = {
             {
                 test: /\.d\.ts$/i,
                 use: "null-loader"
+            },
+            {
+                test: /\.png$/i,
+                use: {
+                    loader: "url-loader",
+                    options: {
+                        limit: Infinity
+                    }
+                }
             }
         ]
     },

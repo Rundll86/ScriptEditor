@@ -1,4 +1,5 @@
 import { Vector } from "./types/structs";
+import invalidAssetImage from "../public/img/invalid-asset.png";
 export function declareGlobalVaribles(obj: { [key: string]: any }) {
     Object.keys(obj).forEach((key) => {
         Object.defineProperty(window, key, {
@@ -12,7 +13,7 @@ export function bezierCurve(t: number, a: Vector, control1: Vector, control2: Ve
     return new Vector(x, y);
 };
 export function circleEquation(p: Vector, circleCenter: Vector, radius: number): boolean {
-    return (p.x - circleCenter.x) ** 2 + (p.y - circleCenter.y) ** 2 <= radius ** 2;
+    return ((p.x - circleCenter.x) ** 2 + (p.y - circleCenter.y) ** 2) <= (radius ** 2);
 };
 export function findClosestBezierCircleIntersection(
     a: Vector,
@@ -36,6 +37,14 @@ export function findClosestBezierCircleIntersection(
     };
     return closestIntersection;
 };
+export function createObjectUrl(data?: string | ArrayBuffer | null): string {
+    if (data) {
+        return URL.createObjectURL(new Blob([data]));
+    } else {
+        return invalidAssetUrl;
+    };
+};
+export const invalidAssetUrl = invalidAssetImage;
 export function calcControl(
     a: Vector,
     b: Vector,

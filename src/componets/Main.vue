@@ -25,19 +25,33 @@
             角色列表：<WideButton @click="addCharacter">+ 添加角色</WideButton>
             <div class="options">
                 <div class="option" v-for="_, index in characters" :key="index">
-                    <input v-model="characters[index]" class="margin5 right" placeholder="角色名称...">
-                    <PrimaryButton class="margin-auto left" @click="removeCharacter(index)">移除</PrimaryButton>
+                    <input v-model="characters[index]" class="margin5 right flexfill" placeholder="角色名称...">
+                    <PrimaryButton class="margin-auto left margin5 right" @click="removeCharacter(index)">移除
+                    </PrimaryButton>
+                    <PrimaryButton class="margin5 right"
+                        @click="charactersSettings[index].setting = !charactersSettings[index].setting">
+                        设置心情头像</PrimaryButton>
+                    <div v-if="charactersSettings[index].setting" class="flex vc gap5">
+                        <Selector :options="keyMapper(feelings, feelingMaps)"
+                            v-model="charactersSettings[index].currentAvatar" />
+                        <img class="size80"
+                            :src="assetDatas[assetNames.indexOf(charactersSettings[index].avatar[charactersSettings[index].currentAvatar])]?.dataUrl ?? invalidAssetUrl">
+                        使用资源名：
+                        <Selector :options="keyMirror(assetNames)"
+                            v-model="charactersSettings[index].avatar[charactersSettings[index].currentAvatar]" />
+                    </div>
                 </div>
                 <span v-if="!characters.length">没有创建任何角色！</span>
             </div>
             心情条目：<WideButton @click="addFeeling">+ 添加心情</WideButton>
             <div class="options">
+                <span v-if="feelings.length === 1">至少需要保留一种心情条目！</span>
                 <div class="option" v-for="_, index in feelings" :key="index">
                     <input v-model="feelings[index]" class="margin5 right" placeholder="心情名称...">
                     <input v-model="feelingMaps[index]" class="margin5 right" placeholder="对应映射ID...">
-                    <PrimaryButton class="margin-auto left" @click="removeFeeling(index)">移除</PrimaryButton>
+                    <PrimaryButton v-if="feelings.length >= 2" class="margin-auto left" @click="removeFeeling(index)">移除
+                    </PrimaryButton>
                 </div>
-                <span v-if="!feelings.length">没有创建任何心情！</span>
             </div>
         </SubWindow>
         <SubWindow title="脚本管理" :states="windowState" name="script">
@@ -79,7 +93,7 @@
                 <div v-for="content, index in Object.keys(invalidContents)" :key="index">
                     <span>{{ jargon(content) }}：</span>
                     <div class="options">
-                        <div v-for="asset in invalidContents[content]" class="option"  :key="asset">
+                        <div v-for="asset in invalidContents[content]" class="option" :key="asset">
                             {{ content === "assets" ? "空资源×1" : asset || "无效或空名称×1" }}
                         </div>
                         <span v-if="!invalidContents[content].length">（无）</span>
@@ -87,10 +101,10 @@
                 </div>
             </div>
             无效资源不会被打包，请先处理无效资源。<br>
-            <div style="text-align: center">
+            <div class="flex hc vc">
                 <WideButton @click="downloadFile(JSON.stringify(projectData[targetSaver]), `${targetSaver}.json`)">独立编译
                 </WideButton>
-                <Selector v-model="targetSaver" style="vertical-align: revert;"
+                <Selector v-model="targetSaver"
                     :options="keyMapper(Object.keys(invalidContents).map(e => jargon(e) + '数据'), Object.keys(invalidContents))" />
             </div>
             <WideButton @click="downloadFile(JSON.stringify(projectData), 'project.json')">保存整个项目</WideButton>
@@ -106,7 +120,7 @@
             [[ 特别鸣谢 ]]<br>
             <Member name="FallingShrimp" alias="陨落基围虾" website="https://rundll86.github.io" />
             <Member name="Cyberexplorer" alias="赛博猫猫" website="https://lanwywritexu.github.io" />
-            <Member circle name="SolariiX" alias="为每块屏幕创造精彩" website="https://solariix.com" />
+            <Member team with-border name="SolariiX" alias="为每块屏幕创造精彩" website="https://solariix.com" />
         </SubWindow>
     </div>
 </template>
@@ -226,8 +240,8 @@ import SubWindow from "./SubWindow.vue";
 import WideButton from "./WideButton.vue";
 import Member from "./Member.vue";
 import Stage from "./Stage.vue";
-import { Drawing, keyMapper } from "../tools";
-import { AssetDescriptor, NodeUpdater, ScriptAssetGenerated, ScriptNode, ScriptNodeGenerated, ScriptNodeNext, ScriptNodeType, SelectOption, Vector } from "../types/structs";
+import { createObjectUrl, Drawing, invalidAssetUrl, keyMapper, keyMirror } from "../tools";
+import { AssetDescriptor, CharacterSetting, NodeUpdater, ScriptAssetGenerated, ScriptNode, ScriptNodeGenerated, ScriptNodeNext, ScriptNodeType, SelectOption, Vector } from "../types/structs";
 import Node from "./Node.vue";
 import PrimaryButton from "./PrimaryButton.vue";
 import Selector from "./Selector.vue";
@@ -237,7 +251,7 @@ type AcceptType = {
     dataurl: string,
     arraybuffer: ArrayBuffer,
     text: string
-}
+};
 export default {
     mounted() {
         window.addEventListener("resize", this.updateLines);
@@ -299,13 +313,21 @@ export default {
             });
             return result;
         },
-        projectData() {
-            const result: Record<"nodes" | "characters" | "feelings" | "scripts" | "assets", any> & { [key: string]: any } = {
-                nodes: {} as Record<string, ScriptNodeGenerated>,
+        projectData(): {
+            nodes: Record<string, ScriptNodeGenerated>,
+            characters: string[],
+            characterAvatars: Record<string, string>[],
+            feelings: Record<string, string>,
+            scripts: string[],
+            assets: Record<string, ScriptAssetGenerated>
+        } & Record<string, any> {
+            const result: typeof this.projectData = {
+                nodes: {},
                 characters: [...this.characters],
-                feelings: {} as Record<string, string>,
+                characterAvatars: this.charactersSettings.map(e => e.avatar),
+                feelings: {},
                 scripts: [...this.scripts],
-                assets: {} as Record<string, ScriptAssetGenerated>
+                assets: {}
             };
             this.nodes.forEach(node => {
                 const current: ScriptNodeGenerated = {
@@ -347,6 +369,7 @@ export default {
         return {
             nodes: [] as ScriptNode[],
             characters: [] as string[],
+            charactersSettings: [] as CharacterSetting[],
             feelings: ["平静", "悲伤", "愤怒", "震惊", "恐惧", "喜悦"] as string[],
             feelingMaps: ["normal", "sad", "angry", "shocked", "afraid", "happy"] as string[],
             scripts: ["damageCurrent", "addHp", "addBullet"] as string[],
@@ -412,10 +435,16 @@ export default {
             })
         },
         addCharacter() {
+            this.charactersSettings.push({
+                setting: false,
+                avatar: {},
+                currentAvatar: this.feelings[0]
+            });
             this.characters.push("");
         },
         removeCharacter(index: number) {
             this.characters.splice(index, 1);
+            this.charactersSettings.splice(index, 1);
         },
         addFeeling() {
             this.feelingMaps.push("");
@@ -468,11 +497,7 @@ export default {
                 type: "image",
                 previewing: false,
                 get dataUrl() {
-                    if (this.data) {
-                        return URL.createObjectURL(new Blob([this.data]));
-                    } else {
-                        return "";
-                    };
+                    return createObjectUrl(this.data);
                 }
             });
             this.assetNames.push("");
@@ -562,6 +587,7 @@ export default {
             const originalData = {
                 nodes: [] as ScriptNode[],
                 characters: [] as string[],
+                characterSettings: [] as CharacterSetting[],
                 feelings: [] as string[],
                 feelingMaps: [] as string[],
                 scripts: [] as string[],
@@ -597,6 +623,13 @@ export default {
             originalData.feelings = Object.keys(projectData.feelings);
             originalData.feelingMaps = Object.values(projectData.feelings);
             originalData.scripts = projectData.scripts;
+            projectData.characterAvatars.forEach(e => {
+                originalData.characterSettings.push({
+                    setting: false,
+                    avatar: e,
+                    currentAvatar: this.feelings[0]
+                });
+            });
             for (const assetName in projectData.assets) {
                 const asset = projectData.assets[assetName];
                 originalData.assetNames.push(assetName);
@@ -605,11 +638,7 @@ export default {
                     type: asset.type,
                     previewing: false,
                     get dataUrl() {
-                        if (this.data) {
-                            return URL.createObjectURL(new Blob([this.data]));
-                        } else {
-                            return "";
-                        };
+                        return createObjectUrl(this.data);
                     }
                 });
             };

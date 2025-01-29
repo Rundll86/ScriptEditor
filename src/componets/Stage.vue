@@ -12,7 +12,11 @@ canvas {
 }
 
 canvas:hover {
-    cursor: move;
+    cursor: grab;
+}
+
+canvas:active {
+    cursor: grabbing;
 }
 </style>
 <script setup>

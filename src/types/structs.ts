@@ -68,4 +68,9 @@ export interface AssetDescriptor {
 export interface ScriptAssetGenerated {
     data: string;
     type: string;
-}
+};
+export interface CharacterSetting {
+    setting: boolean,
+    avatar: Record<string, string>, // 心情 -> 头像
+    currentAvatar: string
+};

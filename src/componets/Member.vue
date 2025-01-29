@@ -2,12 +2,12 @@
     <div class="root">
         <img :src="`./img/${name}.jpg`" :class="{
             avatar: true,
-            border: circle
+            border: withBorder
         }">
-        <span class="name">{{ name }}</span>
+        <span class="name">{{ name + (team ? "(Team)" : "") }}</span>
         <a :href="website" target="_blank" class="alias smallfont">
-            {{ alias }}
-            {{ website ? "[↗]" : ""}}
+            - {{ alias }}
+            {{ website ? "[↗]" : "" }}
         </a>
     </div>
 </template>
@@ -26,7 +26,8 @@ export default defineComponent({
             default: "MemberAlias"
         },
         website: String,
-        circle: Boolean
+        withBorder: Boolean,
+        team: Boolean
     }
 });
 </script>

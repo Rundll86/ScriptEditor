@@ -32,6 +32,11 @@ import ToolBoxButton from "./ToolBoxButton.vue";
 </script>
 <script lang="ts">
 export default {
+    mounted() {
+        this.$nextTick(() => {
+            this.select(this.selected);
+        });
+    },
     props: {
         options: {
             type: Object,
@@ -79,7 +84,6 @@ export default {
 <style scoped>
 .container {
     display: inline-block;
-    vertical-align: top;
     border: 1px solid gray;
     position: relative;
     box-sizing: border-box;

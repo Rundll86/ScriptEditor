@@ -29,6 +29,10 @@ input.wide {
     box-sizing: border-box;
 }
 
+input.flexfill {
+    flex-grow: 1;
+}
+
 .margin5.right {
     margin-right: 5px;
 }
@@ -39,6 +43,27 @@ input.wide {
 
 .margin-auto.left {
     margin-left: auto;
+}
+
+.flex {
+    display: flex;
+}
+
+.flex.vc {
+    align-items: center;
+}
+
+.flex.hc {
+    justify-content: center;
+}
+
+.flex.gap5 {
+    gap: 5px;
+}
+
+img.size80 {
+    width: 80px;
+    height: 80px;
 }
 
 input:hover,
