@@ -103,12 +103,20 @@
             </div>
             无效内容不会被打包，请先处理无效资源。<br>
             <div class="flex hc vc">
-                <WideButton @click="downloadFile(JSON.stringify(projectData[targetSaver]), `${targetSaver}.json`)">独立编译
+                <WideButton
+                    @click="downloadFile(JSON.stringify(projectData[targetSaver], null, project.saveWithIndent ? 4 : 0), `${targetSaver}.json`)">
+                    独立编译
                 </WideButton>
                 <Selector v-model="targetSaver"
                     :options="keyMapper(Object.keys(invalidContents).map(e => jargon(e) + '数据'), Object.keys(invalidContents))" />
             </div>
-            <WideButton @click="downloadFile(JSON.stringify(projectData), 'project.json')">保存整个项目</WideButton>
+            <div class="flex hc vc">
+                带JSON缩进保存（会增大文件体积，但是便于阅读）
+                <CheckBox v-model="project.saveWithIndent" />
+            </div>
+            <WideButton
+                @click="downloadFile(JSON.stringify(projectData, null, project.saveWithIndent ? 4 : 0), 'full-project.json')">
+                保存整个项目</WideButton>
             <WideButton @click="loadProject">从电脑加载项目</WideButton>
         </SubWindow>
         <SubWindow center title="关于" :states="windowState" name="about">
@@ -242,6 +250,7 @@ import { AssetDescriptor, CharacterSetting, NodeUpdater, ScriptAssetGenerated, S
 import Node from "./Node.vue";
 import PrimaryButton from "./PrimaryButton.vue";
 import Selector from "./Selector.vue";
+import CheckBox from "./CheckBox.vue";
 </script>
 <script lang="ts">
 type AcceptType = {
@@ -386,7 +395,8 @@ export default {
                 project: false
             },
             project: {
-                name: "未命名项目"
+                name: "未命名项目",
+                saveWithIndent: false
             },
             highLayerPosition: new Vector(0, 0),
             draggingHighLayer: false,
@@ -641,6 +651,7 @@ export default {
             };
             this.updaters = [];
             this.nodes = originalData.nodes;
+            this.charactersSettings = originalData.characterSettings;
             this.characters = originalData.characters;
             this.feelings = originalData.feelings;
             this.feelingMaps = originalData.feelingMaps;

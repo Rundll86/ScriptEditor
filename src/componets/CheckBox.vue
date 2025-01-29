@@ -10,6 +10,7 @@ span {
     position: relative;
     display: inline-block;
     border: 1px solid black;
+    margin: 0 5px;
 }
 
 span::before {

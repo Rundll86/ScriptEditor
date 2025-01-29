@@ -16,9 +16,9 @@
                             说话者情绪：
                             <Selector wide v-model="node.data.feeling" :options="keyMirror(feelings)" />
                         </div>
-                        <div class="flex down hc vc margin5 outset">
+                        <div class="flex down hc vc margin5 outset" v-if="node.data.talker && node.data.feeling">
                             头像预览
-                            <img class="size80 border2 gray margin5 top" v-if="node.data.talker && node.data.feeling"
+                            <img class="size80 border2 gray margin5 top"
                                 :src="assetDatas[assetNames.indexOf(characterSettings[characters.indexOf(node.data.talker)].avatar[feelings.indexOf(node.data.feeling)])]?.dataUrl ?? invalidAssetUrl" />
                         </div>
                     </div>
