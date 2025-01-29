@@ -71,6 +71,6 @@ export interface ScriptAssetGenerated {
 };
 export interface CharacterSetting {
     setting: boolean,
-    avatar: Record<string, string>, // 心情 -> 头像
-    currentAvatar: string
+    avatar: Record<number, string>, // 心情 -> 头像
+    currentAvatar: number
 };

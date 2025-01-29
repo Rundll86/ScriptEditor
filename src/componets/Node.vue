@@ -9,18 +9,36 @@
             </div>
             <div class="content">
                 <div v-if="node.type === 'talk'">
-                    说话者：<br>
-                    <Selector wide v-model="node.data.talker" :options="keyMirror(characters)" /><br>
-                    说话者情绪：<br>
-                    <Selector wide v-model="node.data.feeling" :options="keyMirror(feelings)" /><br>
+                    <div class="flex">
+                        <div class="flex down">
+                            说话者：
+                            <Selector wide v-model="node.data.talker" :options="keyMirror(characters)" />
+                            说话者情绪：
+                            <Selector wide v-model="node.data.feeling" :options="keyMirror(feelings)" />
+                        </div>
+                        <div class="flex down hc vc margin5 outset">
+                            头像预览
+                            <img class="size80 border2 gray margin5 top" v-if="node.data.talker && node.data.feeling"
+                                :src="assetDatas[assetNames.indexOf(characterSettings[characters.indexOf(node.data.talker)].avatar[feelings.indexOf(node.data.feeling)])]?.dataUrl ?? invalidAssetUrl" />
+                        </div>
+                    </div>
                     内容：<br>
-                    <input v-model="node.data.content">
+                    <input class="wide" v-model="node.data.content">
                 </div>
                 <div v-if="node.type === 'select'">
-                    说话者：<br>
-                    <Selector wide v-model="node.data.talker" :options="keyMirror(characters)" /><br>
-                    说话者情绪：<br>
-                    <Selector wide v-model="node.data.feeling" :options="keyMirror(feelings)" /><br>
+                    <div class="flex">
+                        <div class="flex down">
+                            说话者：
+                            <Selector wide v-model="node.data.talker" :options="keyMirror(characters)" />
+                            说话者情绪：
+                            <Selector wide v-model="node.data.feeling" :options="keyMirror(feelings)" />
+                        </div>
+                        <div class="flex down hc vc margin5 outset">
+                            头像预览
+                            <img class="size80 border2 gray margin5 top" v-if="node.data.talker && node.data.feeling"
+                                :src="assetDatas[assetNames.indexOf(characterSettings[characters.indexOf(node.data.talker)].avatar[feelings.indexOf(node.data.feeling)])]?.dataUrl ?? invalidAssetUrl" />
+                        </div>
+                    </div>
                     内容：<br>
                     <input class="wide" v-model="node.data.content"><br>
                     选项：
@@ -146,9 +164,9 @@
 </style>
 <script setup lang="ts">
 import Draggable from "./Draggable.vue";
-import { Drawing, keyMirror } from "../tools";
+import { Drawing, invalidAssetUrl, keyMirror } from "../tools";
 import Selector from "./Selector.vue";
-import { AssetDescriptor, ScriptNode, ScriptNodeNext, ScriptNodeType } from "src/types/structs";
+import { AssetDescriptor, CharacterSetting, ScriptNode, ScriptNodeNext, ScriptNodeType } from "src/types/structs";
 import PrimaryButton from "./PrimaryButton.vue";
 import { PropType } from "vue";
 import WideButton from "./WideButton.vue";
@@ -174,6 +192,10 @@ export default {
         },
         characters: {
             type: Array<string>,
+            required: true
+        },
+        characterSettings: {
+            type: Array as PropType<CharacterSetting[]>,
             required: true
         },
         feelings: {

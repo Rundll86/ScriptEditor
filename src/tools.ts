@@ -75,18 +75,24 @@ export function calcControl(
     };
     return { control1, control2 };
 };
-export function keyMirror(...keys: (string | string[])[]) {
-    const result: any = {};
-    keys.forEach(key => {
-        if (typeof key === "string") {
-            result[key] = key;
-        } else {
-            key.forEach(key => {
-                result[key] = key;
-            });
-        };
+type RecursionArray<T> = T | T[] | RecursionArray<T>[];
+export function keyMirror(...keys: RecursionArray<string>[]) {
+    const result: Record<string, string> = {};
+    flatArray<string>(keys).forEach((key) => {
+        result[key] = key;
     });
     return result;
+};
+export function keyMirrorIndex(...keys: RecursionArray<string>[]) {
+    const result: Record<string, number> = {};
+    flatArray<string>(keys).forEach((key, index) => {
+        result[key] = index;
+    });
+    return result;
+};
+export function flatArray<T>(data: RecursionArray<T>): T[] {
+    if (!Array.isArray(data)) return [data];
+    return data.map(e => flatArray(e as RecursionArray<T>)).flat() as T[];
 };
 export function keyMapper(keys: string[], values: string[]) {
     const result: any = {};

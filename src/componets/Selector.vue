@@ -28,6 +28,7 @@
     </div>
 </template>
 <script setup lang="ts">
+import { PropType } from "vue";
 import ToolBoxButton from "./ToolBoxButton.vue";
 </script>
 <script lang="ts">
@@ -43,8 +44,7 @@ export default {
             default: () => ({ option1: "a", option2: "b", option3: "c" })
         },
         modelValue: {
-            type: String,
-            default: ""
+            type: null
         },
         option: {
             type: String,

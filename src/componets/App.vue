@@ -33,6 +33,10 @@ input.flexfill {
     flex-grow: 1;
 }
 
+.margin5.outset {
+    margin: 5px;
+}
+
 .margin5.right {
     margin-right: 5px;
 }
@@ -41,12 +45,20 @@ input.flexfill {
     margin-left: 5px;
 }
 
+.margin5.top {
+    margin-top: 5px;
+}
+
 .margin-auto.left {
     margin-left: auto;
 }
 
 .flex {
     display: flex;
+}
+
+.flex.down {
+    flex-direction: column;
 }
 
 .flex.vc {
@@ -61,8 +73,20 @@ input.flexfill {
     gap: 5px;
 }
 
+.border2.gray {
+    border: 2px solid gray;
+}
+
 img.size80 {
     width: 80px;
+    height: 80px;
+}
+
+img.width80 {
+    width: 80px;
+}
+
+img.height80 {
     height: 80px;
 }
 

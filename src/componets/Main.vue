@@ -11,7 +11,8 @@
             v-model:x="node.position.x" v-model:y="node.position.y"
             :updaterRegister="(func: NodeUpdater) => updaters.push(func)" @change="updateLines"
             :forceUpdater="updateLines" :characters="characters" :feelings="feelings" :scripts="scripts"
-            :assetNames="assetNames" :assetDatas="assetDatas" @remove="removeNode(index)" @clone="cloneNode(index)" />
+            :assetNames="assetNames" :assetDatas="assetDatas" @remove="removeNode(index)" @clone="cloneNode(index)"
+            :characterSettings="charactersSettings" />
     </div>
     <div class="higher-layer">
         <SubWindow flexdown title="添加剧本节点" :states="windowState" name="node">
@@ -32,7 +33,7 @@
                         @click="charactersSettings[index].setting = !charactersSettings[index].setting">
                         设置心情头像</PrimaryButton>
                     <div v-if="charactersSettings[index].setting" class="flex vc gap5">
-                        <Selector :options="keyMapper(feelings, feelingMaps)"
+                        <Selector :options="keyMirrorIndex(feelings)"
                             v-model="charactersSettings[index].currentAvatar" />
                         <img class="size80"
                             :src="assetDatas[assetNames.indexOf(charactersSettings[index].avatar[charactersSettings[index].currentAvatar])]?.dataUrl ?? invalidAssetUrl">
@@ -67,7 +68,7 @@
         <SubWindow title="资源管理" :states="windowState" name="asset">
             <div class="options">
                 <div class="option" v-for="_, index in assetNames" :key="index">
-                    <img :src="assetDatas[index].dataUrl" class="margin5 right asset"
+                    <img :src="assetDatas[index].dataUrl" class="margin5 right asset size80"
                         v-if="assetDatas[index].type === 'image' && assetDatas[index].previewing" />
                     <video :src="assetDatas[index].dataUrl" class="margin5 right asset"
                         v-if="assetDatas[index].type === 'video' && assetDatas[index].previewing"></video>
@@ -100,7 +101,7 @@
                     </div>
                 </div>
             </div>
-            无效资源不会被打包，请先处理无效资源。<br>
+            无效内容不会被打包，请先处理无效资源。<br>
             <div class="flex hc vc">
                 <WideButton @click="downloadFile(JSON.stringify(projectData[targetSaver]), `${targetSaver}.json`)">独立编译
                 </WideButton>
@@ -229,10 +230,6 @@ a:active {
 .options .remove-btn {
     margin-left: auto;
 }
-
-.asset {
-    width: 70px;
-}
 </style>
 <script setup lang="ts">
 import LeftBox from "./LeftBox.vue";
@@ -240,7 +237,7 @@ import SubWindow from "./SubWindow.vue";
 import WideButton from "./WideButton.vue";
 import Member from "./Member.vue";
 import Stage from "./Stage.vue";
-import { createObjectUrl, Drawing, invalidAssetUrl, keyMapper, keyMirror } from "../tools";
+import { createObjectUrl, Drawing, invalidAssetUrl, keyMapper, keyMirror, keyMirrorIndex } from "../tools";
 import { AssetDescriptor, CharacterSetting, NodeUpdater, ScriptAssetGenerated, ScriptNode, ScriptNodeGenerated, ScriptNodeNext, ScriptNodeType, SelectOption, Vector } from "../types/structs";
 import Node from "./Node.vue";
 import PrimaryButton from "./PrimaryButton.vue";
@@ -438,7 +435,7 @@ export default {
             this.charactersSettings.push({
                 setting: false,
                 avatar: {},
-                currentAvatar: this.feelings[0]
+                currentAvatar: 0
             });
             this.characters.push("");
         },
@@ -627,7 +624,7 @@ export default {
                 originalData.characterSettings.push({
                     setting: false,
                     avatar: e,
-                    currentAvatar: this.feelings[0]
+                    currentAvatar: 0
                 });
             });
             for (const assetName in projectData.assets) {
