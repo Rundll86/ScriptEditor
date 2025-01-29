@@ -1,0 +1,3 @@
+[submodule "src/FryingPan"]
+	path = src/FryingPan
+	url = https://github.com/Rundll86/FryingPan
