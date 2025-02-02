@@ -17,6 +17,8 @@ declare interface Window {
         isProjectExist: (name: string) => Promise<boolean>;
         openDialog: (filename: string) => Promise<string>;
         readProject: (name: string) => Promise<any>;
+        removeProject: (name: string) => Promise<void>;
+        removeProjectCompletely: (name: string) => Promise<void>;
         refresh: () => void;
         toggleDevtool: () => void;
     };

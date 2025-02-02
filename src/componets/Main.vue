@@ -27,7 +27,7 @@
             <div class="options">
                 <div class="option" v-for="_, index in characters" :key="index">
                     <input v-model="characters[index]" class="margin5 right flexfill" placeholder="角色名称...">
-                    <PrimaryButton class="margin-auto left margin5 right" @click="removeCharacter(index)">移除
+                    <PrimaryButton class="margin5 right" @click="removeCharacter(index)">移除
                     </PrimaryButton>
                     <PrimaryButton class="margin5 right"
                         @click="charactersSettings[index].setting = !charactersSettings[index].setting">
@@ -48,9 +48,9 @@
             <div class="options">
                 <span v-if="feelings.length === 1">至少需要保留一种心情条目！</span>
                 <div class="option" v-for="_, index in feelings" :key="index">
-                    <input v-model="feelings[index]" class="margin5 right" placeholder="心情名称...">
-                    <input v-model="feelingMaps[index]" class="margin5 right" placeholder="对应映射ID...">
-                    <PrimaryButton v-if="feelings.length >= 2" class="margin-auto left" @click="removeFeeling(index)">移除
+                    <input v-model="feelings[index]" class="margin5 right flexfill" placeholder="心情名称...">
+                    <input v-model="feelingMaps[index]" class="margin5 right flexfill" placeholder="对应映射ID...">
+                    <PrimaryButton v-if="feelings.length >= 2" @click="removeFeeling(index)">移除
                     </PrimaryButton>
                 </div>
             </div>
@@ -132,9 +132,16 @@
         <SubWindow flexdown title="项目管理器" :states="windowState" name="projectMgr">
             <div class="options">
                 <div class="option" v-for="project in projectList">
-                    <span>{{ project }}</span>
-                    <PrimaryButton @click="openProject(project)">打开</PrimaryButton>
+                    <span class="margin5 right">{{ project }}</span>
+                    <PrimaryButton @click="openProject(project)" class="margin-auto left">打开</PrimaryButton>
+                    <PrimaryButton @click="removeProject(project)" class="margin5 left">
+                        从列表删除
+                    </PrimaryButton>
+                    <PrimaryButton @click="removeProjectCompletely(project)" class="margin5 left">
+                        彻底删除
+                    </PrimaryButton>
                 </div>
+                <span v-if="!projectList.length">没有创建任何项目！</span>
             </div>
         </SubWindow>
     </div>
@@ -707,6 +714,14 @@ export default {
                 this.reconstructOriginalData(e);
                 this.$nextTick(() => this.updateLines());
             });
+        },
+        async removeProject(name: string) {
+            await window.desktopApi.removeProject(name);
+            this.reloadProjectList();
+        },
+        async removeProjectCompletely(name: string) {
+            await window.desktopApi.removeProjectCompletely(name);
+            this.reloadProjectList();
         }
     }
 }
