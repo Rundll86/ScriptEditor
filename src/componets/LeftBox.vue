@@ -19,6 +19,9 @@
             <ToolBtn @click="openWindow('about')" class="top-auto" tip="关于">
                 <Icon src="about.svg" />
             </ToolBtn>
+            <ToolBtn @click="openWindow('projectMgr')" tip="项目管理器" v-if="isDesktop()">
+                <Icon src="logo.ico" />
+            </ToolBtn>
         </div>
     </div>
 </template>
@@ -71,6 +74,9 @@ export default {
     methods: {
         openWindow(name: string) {
             this.states[name] = true;
+        },
+        isDesktop() {
+            return window.isDesktop;
         }
     }
 }

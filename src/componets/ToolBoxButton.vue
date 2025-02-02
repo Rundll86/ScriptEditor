@@ -30,7 +30,7 @@
     top: 0;
     display: flex;
     align-items: center;
-    width: 75px;
+    min-width: 75px;
     transform-origin: 0% 50%;
     opacity: 0;
     transform: scale(0);
@@ -44,7 +44,7 @@
 .tip {
     width: 100%;
     border: 2px solid gray;
-    padding: 1px 3px;
+    padding: 1px 5px;
     border-radius: 5px;
 }
 

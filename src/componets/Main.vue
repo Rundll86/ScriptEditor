@@ -114,9 +114,7 @@
                 带JSON缩进保存（会增大文件体积，但是便于阅读）
                 <CheckBox v-model="project.saveWithIndent" />
             </div>
-            <WideButton
-                @click="downloadFile(JSON.stringify(projectData, null, project.saveWithIndent ? 4 : 0), 'full-project.json')">
-                保存整个项目</WideButton>
+            <WideButton @click="saveProject">保存整个项目</WideButton>
             <WideButton @click="loadProject">从电脑加载项目</WideButton>
         </SubWindow>
         <SubWindow center title="关于" :states="windowState" name="about">
@@ -130,6 +128,14 @@
             <Member name="FallingShrimp" alias="陨落基围虾" website="https://rundll86.github.io" />
             <Member name="Cyberexplorer" alias="赛博猫猫" website="https://lanwywritexu.github.io" />
             <Member team with-border name="SolariiX" alias="为每块屏幕创造精彩" website="https://solariix.com" />
+        </SubWindow>
+        <SubWindow flexdown title="项目管理器" :states="windowState" name="projectMgr">
+            <div class="options">
+                <div class="option" v-for="project in projectList">
+                    <span>{{ project }}</span>
+                    <PrimaryButton @click="openProject(project)">打开</PrimaryButton>
+                </div>
+            </div>
         </SubWindow>
     </div>
 </template>
@@ -251,6 +257,7 @@ import Node from "./Node.vue";
 import PrimaryButton from "./PrimaryButton.vue";
 import Selector from "./Selector.vue";
 import CheckBox from "./CheckBox.vue";
+import { toRaw } from "vue";
 </script>
 <script lang="ts">
 type AcceptType = {
@@ -260,6 +267,7 @@ type AcceptType = {
 };
 export default {
     mounted() {
+        this.reloadProjectList();
         window.addEventListener("resize", this.updateLines);
         (this.$refs.stage as any).$el.addEventListener("mousedown", (e: MouseEvent) => {
             if (!window.dragging) {
@@ -277,6 +285,15 @@ export default {
                 this.updateLines();
             };
         });
+        if (window.isDesktop) {
+            window.addEventListener("keydown", e => {
+                if (e.key === "F5") {
+                    window.desktopApi.refresh();
+                } else if (e.key === "F12") {
+                    window.desktopApi.toggleDevtool();
+                };
+            });
+        };
     },
     computed: {
         saveData() {
@@ -325,7 +342,8 @@ export default {
             characterAvatars: Record<string, string>[],
             feelings: Record<string, string>,
             scripts: string[],
-            assets: Record<string, ScriptAssetGenerated>
+            assets: Record<string, ScriptAssetGenerated>,
+            name: string
         } & Record<string, any> {
             const result: typeof this.projectData = {
                 nodes: {},
@@ -333,7 +351,8 @@ export default {
                 characterAvatars: this.charactersSettings.map(e => e.avatar),
                 feelings: {},
                 scripts: [...this.scripts],
-                assets: {}
+                assets: {},
+                name: this.project.name
             };
             this.nodes.forEach(node => {
                 const current: ScriptNodeGenerated = {
@@ -389,18 +408,20 @@ export default {
                 asset: false,
                 project: false,
                 about: false,
+                projectMgr: false,
                 activing: ""
             },
             contextMenuState: {
                 project: false
             },
             project: {
-                name: "未命名项目",
+                name: "unnamed",
                 saveWithIndent: false
             },
             highLayerPosition: new Vector(0, 0),
             draggingHighLayer: false,
-            targetSaver: ""
+            targetSaver: "",
+            projectList: [] as string[]
         };
     },
     methods: {
@@ -551,6 +572,20 @@ export default {
             a.download = filename;
             a.click();
         },
+        async saveProject() {
+            if (window.isDesktop) {
+                if (!await window.desktopApi.isProjectExist(this.project.name)) {
+                    await window.desktopApi.createProject(
+                        this.project.name,
+                        await window.desktopApi.openDialog(this.project.name + ".json")
+                    );
+                };
+                await window.desktopApi.saveProject(this.project.name, JSON.stringify(this.projectData));
+                this.reloadProjectList();
+            } else {
+                this.downloadFile(JSON.stringify(this.projectData, null, this.project.saveWithIndent ? 4 : 0), `${this.project.name}.json`);
+            };
+        },
         async updateUpload(index: number) {
             this.assetDatas[index].data = await this.uploadFile("arraybuffer");
         },
@@ -583,7 +618,7 @@ export default {
             const bytes = new Uint8Array(len);
             for (let i = 0; i < len; i++) {
                 bytes[i] = binaryString.charCodeAt(i);
-            }
+            };
             return bytes.buffer;
         },
         async loadProject() {
@@ -658,6 +693,20 @@ export default {
             this.scripts = originalData.scripts;
             this.assetNames = originalData.assetNames;
             this.assetDatas = originalData.assetDatas;
+            this.project.name = projectData.name;
+        },
+        reloadProjectList() {
+            if (!window.isDesktop) return;
+            window.desktopApi.getProjects().then(e => {
+                this.projectList = e;
+            });
+        },
+        openProject(name: string) {
+            window.desktopApi.readProject(name).then(e => {
+                console.log(e);
+                this.reconstructOriginalData(e);
+                this.$nextTick(() => this.updateLines());
+            });
         }
     }
 }
