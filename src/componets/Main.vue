@@ -15,12 +15,20 @@
             :characterSettings="charactersSettings" />
     </div>
     <div class="higher-layer">
-        <SubWindow flexdown title="添加剧本节点" :states="windowState" name="node">
-            <WideButton @click="addNode('talk')">+ 普通对话框</WideButton>
-            <WideButton @click="addNode('select')">+ 对话选择框</WideButton>
-            <WideButton @click="addNode('image')">+ 显示图像（CG）</WideButton>
-            <WideButton @click="addNode('video')">+ 显示视频（过场动画）</WideButton>
-            <WideButton @click="addNode('script')">+ 脚本执行</WideButton>
+        <SubWindow title="添加剧本节点" :states="windowState" name="node">
+            <WideButton @click="addNode(nodeType)">
+                <VerticalCenter>
+                    添加一个
+                    <Selector :options="{
+                        '对话': 'talk',
+                        '选择分支': 'select',
+                        '图片': 'image',
+                        '视频': 'video',
+                        '脚本执行': 'script'
+                    }" v-model="nodeType" />
+                    节点
+                </VerticalCenter>
+            </WideButton>
         </SubWindow>
         <SubWindow title="角色管理" :states="windowState" name="character">
             角色列表：<WideButton @click="addCharacter">+ 添加角色</WideButton>
@@ -124,7 +132,7 @@
                 &lt;开源许可&gt; MIT<br>
                 &lt;仓库&gt; <a href="https://github.com/Rundll86/ScriptEditor" target="_blank">Github</a>
             </div><br>
-            [[ 特别鸣谢 ]]<br>
+            <b>特别鸣谢</b><br>
             <Member name="FallingShrimp" alias="陨落基围虾" website="https://rundll86.github.io" />
             <Member name="Cyberexplorer" alias="赛博猫猫" website="https://lanwywritexu.github.io" />
             <Member team with-border name="SolariiX" alias="为每块屏幕创造精彩" website="https://solariix.com" />
@@ -264,7 +272,8 @@ import Node from "./Node.vue";
 import PrimaryButton from "./PrimaryButton.vue";
 import Selector from "./Selector.vue";
 import CheckBox from "./CheckBox.vue";
-import { toRaw } from "vue";
+import VerticalCenter from "./VerticalCenter.vue";
+import { Component } from "vue";
 </script>
 <script lang="ts">
 type AcceptType = {
@@ -276,7 +285,7 @@ export default {
     mounted() {
         this.reloadProjectList();
         window.addEventListener("resize", this.updateLines);
-        (this.$refs.stage as any).$el.addEventListener("mousedown", (e: MouseEvent) => {
+        (this.$refs.stage as { $el: HTMLCanvasElement }).$el.addEventListener("mousedown", (e: MouseEvent) => {
             if (!window.dragging) {
                 e.preventDefault();
                 this.draggingHighLayer = true;
@@ -428,7 +437,8 @@ export default {
             highLayerPosition: new Vector(0, 0),
             draggingHighLayer: false,
             targetSaver: "",
-            projectList: [] as string[]
+            projectList: [] as string[],
+            nodeType: "talk" as ScriptNodeType
         };
     },
     methods: {

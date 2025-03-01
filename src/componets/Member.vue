@@ -6,8 +6,7 @@
         }">
         <span class="name">{{ name + (team ? "(Team)" : "") }}</span>
         <a :href="website" target="_blank" class="alias smallfont">
-            - {{ alias }}
-            {{ website ? "[↗]" : "" }}
+            {{ alias ? `@${alias}` : "" }}
         </a>
     </div>
 </template>
@@ -19,12 +18,9 @@ export default defineComponent({
     props: {
         name: {
             type: String,
-            default: "UnknownMember"
+            default: "MemberName"
         },
-        alias: {
-            type: String,
-            default: "MemberAlias"
-        },
+        alias: String,
         website: String,
         withBorder: Boolean,
         team: Boolean

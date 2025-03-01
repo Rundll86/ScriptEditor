@@ -1,5 +1,5 @@
 <template>
-    <div class="container" :class="{ wide }">
+    <div class="container" :class="{ wide, float }" @click.stop>
         <div :class="{
             show: true,
             open: opening
@@ -13,7 +13,10 @@
             </ToolBoxButton>
             <input type="text" class="searcher" v-model="searchText" v-if="searching">
         </div>
-        <div class="options" v-if="opening">
+        <div :class="{
+            options: true,
+            float
+        }" v-if="opening">
             <div v-for="option in Object.keys(options)" :key="option">
                 <div class="option" v-if="option.includes(searchText)" :key="option" @click="select(options[option])">
                     <span :class="{
@@ -28,7 +31,6 @@
     </div>
 </template>
 <script setup lang="ts">
-import { PropType } from "vue";
 import ToolBoxButton from "./ToolBoxButton.vue";
 </script>
 <script lang="ts">
@@ -53,7 +55,8 @@ export default {
         wide: {
             type: Boolean,
             default: false
-        }
+        },
+        float: Boolean
     },
     data() {
         return {
@@ -89,6 +92,10 @@ export default {
     box-sizing: border-box;
 }
 
+.container.float {
+    position: relative;
+}
+
 .container.wide {
     width: 100%;
 }
@@ -101,6 +108,16 @@ export default {
 .options {
     overflow: auto;
     max-height: 40vh;
+}
+
+.options.float {
+    position: absolute;
+    top: 100%;
+    left: -1px;
+    width: 100%;
+    border: 1px solid gray;
+    border-top: none;
+    background-color: rgb(240, 240, 240);
 }
 
 .title {
