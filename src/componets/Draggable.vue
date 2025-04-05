@@ -1,5 +1,12 @@
 <template>
-    <div ref="target" class="draggable" :style="{ left: position[0] + 'px', top: position[1] + 'px' }">
+    <div ref="target" class="draggable" :style="{
+        left: position[0] + 'px',
+        top: position[1] + 'px'
+    }" @mousedown.stop @mousedown="startDrag" @touchstart="startDrag({
+        target: $event.target,
+        clientX: $event.touches[0].clientX,
+        clientY: $event.touches[0].clientY
+    })">
         <slot></slot>
     </div>
 </template>
@@ -36,38 +43,53 @@ export default defineComponent({
                 window.mouse = [e.clientX, e.clientY];
             });
         };
-        const draggable: HTMLElement = this.$refs.target as HTMLElement;
         this.position = [this.x, this.y];
         this.lastMouseOffset = [window.mouse[0] - this.position[0], window.mouse[1] - this.position[1]];
-        draggable.addEventListener("mousedown", e => {
+        window.addEventListener("mouseup", this.endDrag);
+        window.addEventListener("mousemove", this.changeDrag);
+        window.addEventListener("touchmove", (e) => {
+            this.changeDrag({
+                clientX: e.touches[0].clientX,
+                clientY: e.touches[0].clientY
+            });
+        });
+        window.addEventListener("touchend", this.endDrag);
+    },
+    watch: {
+        position(value) {
+            this.$emit("update:x", value[0]);
+            this.$emit("update:y", value[1]);
+        }
+    },
+    methods: {
+        startDrag(e: {
+            target: EventTarget | null,
+            clientX: number,
+            clientY: number
+        }) {
             if (
                 e.target
                 && e.target instanceof HTMLElement
                 && e.target.matches("[data-region] *, [data-region]")
                 && !e.target.matches("[data-no-region]")
             ) {
-                window.dragging = true;
                 this.isDragging = true;
                 this.lastMouseOffset = [e.clientX - this.position[0], e.clientY - this.position[1]];
                 this.$emit("dragstart");
             };
-        });
-        window.addEventListener("mouseup", () => {
-            window.dragging = false;
-            this.isDragging = false;
-            this.$emit("dragend");
-        });
-        window.addEventListener("mousemove", (e) => {
+        },
+        changeDrag(e: {
+            clientX: number,
+            clientY: number
+        }) {
             if (this.isDragging) {
                 this.position = [e.clientX - this.lastMouseOffset[0], e.clientY - this.lastMouseOffset[1]];
                 this.$emit("change");
             };
-        });
-    },
-    watch: {
-        position(value) {
-            this.$emit("update:x", value[0]);
-            this.$emit("update:y", value[1]);
+        },
+        endDrag() {
+            this.isDragging = false;
+            this.$emit("dragend");
         }
     }
 });

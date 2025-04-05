@@ -3,17 +3,20 @@
     <div class="content">
         <LeftBox :states="windowState" />
     </div>
-    <div class="high-layer" :style="{
-        left: highLayerPosition.x + 'px',
-        top: highLayerPosition.y + 'px'
-    }">
-        <Node v-for="node, index in nodes" :id="'node-' + node.name" :key="node.name" :node="node" :finder="findNode"
-            v-model:x="node.position.x" v-model:y="node.position.y"
-            :updaterRegister="(func: NodeUpdater) => updaters.push(func)" @change="updateLines"
-            :forceUpdater="updateLines" :characters="characters" :feelings="feelings" :scripts="scripts"
-            :assetNames="assetNames" :assetDatas="assetDatas" @remove="removeNode(index)" @clone="cloneNode(index)"
-            :characterSettings="charactersSettings" />
-    </div>
+    <Draggable>
+        <div class="high-layer" :style="{
+            left: highLayerPosition.x + 'px',
+            top: highLayerPosition.y + 'px'
+        }">
+            <div data-region class="high-drag-handler"></div>
+            <Node v-for="node, index in nodes" :id="'node-' + node.name" :key="node.name" :node="node"
+                :finder="findNode" v-model:x="node.position.x" v-model:y="node.position.y"
+                :updaterRegister="(func: NodeUpdater) => updaters.push(func)" @change="updateLines"
+                :forceUpdater="updateLines" :characters="characters" :feelings="feelings" :scripts="scripts"
+                :assetNames="assetNames" :assetDatas="assetDatas" @remove="removeNode(index)" @clone="cloneNode(index)"
+                :characterSettings="charactersSettings" />
+        </div>
+    </Draggable>
     <div class="higher-layer">
         <SubWindow title="添加剧本节点" :states="windowState" name="node">
             <WideButton @click="addNode(nodeType)">
@@ -163,6 +166,14 @@
     transition: none;
 }
 
+.high-drag-handler {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+}
+
 .higher-layer {
     z-index: 10;
     position: absolute;
@@ -273,7 +284,7 @@ import PrimaryButton from "./PrimaryButton.vue";
 import Selector from "./Selector.vue";
 import CheckBox from "./CheckBox.vue";
 import VerticalCenter from "./VerticalCenter.vue";
-import { Component } from "vue";
+import Draggable from "./Draggable.vue";
 </script>
 <script lang="ts">
 type AcceptType = {
@@ -285,22 +296,22 @@ export default {
     mounted() {
         this.reloadProjectList();
         window.addEventListener("resize", this.updateLines);
-        (this.$refs.stage as { $el: HTMLCanvasElement }).$el.addEventListener("mousedown", (e: MouseEvent) => {
-            if (!window.dragging) {
-                e.preventDefault();
-                this.draggingHighLayer = true;
-            };
-        });
-        window.addEventListener("mouseup", () => {
-            this.draggingHighLayer = false;
-        });
-        window.addEventListener("mousemove", e => {
-            if (this.draggingHighLayer) {
-                this.highLayerPosition.x += e.movementX;
-                this.highLayerPosition.y += e.movementY;
-                this.updateLines();
-            };
-        });
+        // (this.$refs.stage as { $el: HTMLCanvasElement }).$el.addEventListener("mousedown", (e: MouseEvent) => {
+        //     if (!window.dragging) {
+        //         e.preventDefault();
+        //         this.draggingHighLayer = true;
+        //     };
+        // });
+        // window.addEventListener("mouseup", () => {
+        //     this.draggingHighLayer = false;
+        // });
+        // window.addEventListener("mousemove", e => {
+        //     if (this.draggingHighLayer) {
+        //         this.highLayerPosition.x += e.movementX;
+        //         this.highLayerPosition.y += e.movementY;
+        //         this.updateLines();
+        //     };
+        // });
         if (window.isDesktop) {
             window.addEventListener("keydown", e => {
                 if (e.key === "F5") {
