@@ -87,7 +87,7 @@
 }
 
 .node * {
-    text-wrap: nowrap;
+    text-wrap-mode: nowrap;
 }
 
 .title-bar {

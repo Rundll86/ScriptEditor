@@ -107,7 +107,7 @@ export default {
     display: flex;
     align-items: center;
     position: relative;
-    text-wrap: nowrap;
+    text-wrap-mode: nowrap;
     padding: 5px 10px;
 }
 

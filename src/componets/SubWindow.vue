@@ -27,7 +27,7 @@
 }
 
 .container * {
-    text-wrap: nowrap;
+    text-wrap-mode: nowrap;
 }
 
 .container.activing {

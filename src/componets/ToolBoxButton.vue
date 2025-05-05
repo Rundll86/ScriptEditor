@@ -15,7 +15,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    text-wrap: nowrap;
+    text-wrap-mode: nowrap;
     font-size: 12px;
     position: relative;
 }
